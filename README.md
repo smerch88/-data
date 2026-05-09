@@ -8,17 +8,52 @@ Postgres у Docker + малий Node.js/TypeScript бекенд для API до�
 - **pgAdmin 4** — http://localhost:5050 (сервер "Local Postgres" попередньо підключений)
 - **Backend** — Express + Knex + pg, TypeScript, `localhost:3000`
 - **Knex міграції та seeds** — у `backend/migrations/` та `backend/seeds/`
+- **OULAD dataset** — реальні дані Open University Learning Analytics (CC BY 4.0); раз-один тягнеться з figshare скриптом `data:download` (gitignored, 500 MB)
 
-## Старт за 30 секунд
+## Як підняти з нуля (clone → live demo)
 
-```powershell
+```bash
+git clone https://github.com/smerch88/-data.git
+cd -data
 cp .env.example .env
-cd backend; npm install; cd ..
 docker compose up -d
-cd backend; npm run migrate:up
+cd backend && npm install
+npm run migrate:up
+npm run data:full        # download OULAD → sample → seed
 ```
 
-Або з Claude Code: `/setup`.
+**Що робить `data:full`** (chain з трьох кроків):
+1. **`data:download`** — тягне OULAD ZIP з figshare (47 MB, CC BY 4.0), перевіряє MD5, розпаковує 7 CSV у `data/oulad/`. Якщо CSV уже є — скіпає.
+2. **`data:sample`** — читає CSV, семплює 15 студентів з AAA-2013J presentation у 4 demo-персони (HIGH_RISK / MEDIUM_RISK / PASS / FALSE_ALARM), генерує синтетичні Slack-повідомлення, пише `data/oulad/sample.json`.
+3. **`seed:run`** — Knex seed файл [01_oulad_sample.ts](backend/seeds/01_oulad_sample.ts) завантажує `sample.json` у БД (3 mentors, 1 course, 15 students, 90 homework, 61 messages).
+
+Усі три кроки **ідемпотентні** — повторний `npm run data:full` не качає, не семплить і не дублює, якщо стан незмінний.
+
+**Альтернативно через Claude Code**: `/setup` (без OULAD-частини) → потім вручну `npm run data:full`.
+
+### Швидкий smoke-test
+
+```bash
+# DB live
+docker compose ps           # очікуємо app-postgres healthy
+# Tables exist
+docker compose exec postgres psql -U app -d appdb -c "\dt public.*"
+# Data loaded
+docker compose exec postgres psql -U app -d appdb -c "SELECT count(*) FROM students;"  # = 15
+# pgAdmin UI
+open http://localhost:5050  # або відкрити в браузері; логін з .env
+# API
+cd backend && npm run dev    # http://localhost:3000/health
+```
+
+### Якщо щось пішло не так
+
+| Проблема | Рішення |
+|---|---|
+| Postgres не піднімається (port busy) | Змінити `POSTGRES_PORT` в `.env` (default 5433 щоб не конфліктувати з локальним 5432) |
+| `npm run data:download` не може розпакувати ZIP | Перевір, чи є `unzip` (POSIX) або PowerShell (Windows). Скрипт пробує обидва. |
+| Хочу почати з чистого листа | `/db-reset` (⚠️ wipe volume) → `npm run migrate:up` → `npm run data:full` |
+| OULAD MD5 не сходиться | `rm data/oulad/anonymisedData.zip` → `npm run data:download` (перескачає) |
 
 ## Через Claude Code
 
@@ -49,9 +84,18 @@ API:
   settings.json  ← allowlist для часто-вживаних bash команд
 backend/
   src/           ← express + knex
-  migrations/    ← Knex міграції (.ts)
-  seeds/         ← Knex seeds (.ts)
+  migrations/    ← Knex міграції (.ts) — 5 таблиць EdTech retention схеми
+  seeds/         ← Knex seeds (.ts) — завантажує OULAD-сампл
   knexfile.ts
+data/oulad/      ← скрипти для тягання + семплу OULAD (raw CSV gitignored)
+  download.js    ← idempotent figshare-fetcher
+  sample.js      ← OULAD → 15 students × 4 personas → sample.json
+  MAPPING.md     ← повний мапінг OULAD-схеми на нашу
+docs/
+  PROJECT_VISION.md   ← продуктова концепція + emпіричний фундамент
+  proofs/             ← screenshots + цитати для всіх числових тверджень
+  telegram/           ← експорт командного дискусу
+tools/proof-researcher/  ← Patchright stealth screenshot-tool для верифікації цифр
 docker-compose.yml
 infra/pgadmin/servers.json
 .env.example
