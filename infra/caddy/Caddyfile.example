@@ -40,12 +40,11 @@ __DOMAIN__ {
         -Server
     }
 
-    # Access log (rotated by Caddy automatically).
+    # Access log → journald (view with `journalctl -u caddy -f`).
+    # Avoids permission issues with Caddy's restricted systemd unit when
+    # writing to /var/log; the systemd unit allows journald + /var/lib/caddy
+    # but file logging in /var/log requires extra ReadWritePaths config.
     log {
-        output file /var/log/caddy/access.log {
-            roll_size 50mb
-            roll_keep 5
-        }
         format json
     }
 }
