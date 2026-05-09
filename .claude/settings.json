@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose ps:*)",
+      "Bash(docker compose logs:*)",
+      "Bash(docker compose up:*)",
+      "Bash(docker compose down)",
+      "Bash(docker compose down -v)",
+      "Bash(docker compose restart:*)",
+      "Bash(docker compose exec:*)",
+      "Bash(cd backend && npm install:*)",
+      "Bash(cd backend && npm run dev:*)",
+      "Bash(cd backend && npm run typecheck:*)",
+      "Bash(cd backend && npm run migrate:up:*)",
+      "Bash(cd backend && npm run migrate:down:*)",
+      "Bash(cd backend && npm run migrate:status:*)",
+      "Bash(cd backend && npm run migrate:list:*)",
+      "Bash(cd backend && npm run migrate:make:*)",
+      "Bash(cd backend && npm run seed:run:*)",
+      "Bash(cd backend && npm run seed:make:*)",
+      "Bash(curl http://localhost:*)",
+      "Bash(test -f:*)",
+      "Bash(cp .env.example .env)",
+      "Bash(bash infra/vps/vps-run.sh:*)",
+      "Bash(bash infra/vps/bootstrap.sh:*)"
+    ]
+  }
+}

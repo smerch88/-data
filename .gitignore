@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+.DS_Store
+.idea/
+.vscode/
+coverage/
+infra/vps/logs/
+
+# Raw OULAD dataset — re-downloaded on demand via `npm run data:download`
+# (figshare DOI 10.6084/m9.figshare.5081998, CC BY 4.0). 500 MB+, not for git.
+data/oulad/anonymisedData.zip
+data/oulad/*.csv
+
+# Plain-text telegram chat dump (HTML export is in docs/telegram/, ignore .txt re-export)
+docs/telegram/messages.txt

@@ -1,0 +1,13 @@
+{
+  "name": "vps-install-key",
+  "version": "0.0.1",
+  "private": true,
+  "description": "One-time helper: install the project's SSH public key on the VPS using password auth via ssh2.",
+  "type": "module",
+  "scripts": {
+    "install-key": "node install.mjs"
+  },
+  "dependencies": {
+    "ssh2": "^1.16.0"
+  }
+}

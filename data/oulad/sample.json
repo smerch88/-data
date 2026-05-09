@@ -1,0 +1,1716 @@
+{
+  "_meta": {
+    "source": "OULAD (Kuzilek, Hlosta, Zdrahal 2017, figshare DOI 10.6084/m9.figshare.5081998)",
+    "license": "CC BY 4.0",
+    "target_module": "AAA",
+    "target_presentation": "2013J",
+    "sampled_students": 15,
+    "assessments": 6,
+    "generated_at": "2026-05-09T12:10:05.957Z"
+  },
+  "courses": [
+    {
+      "id": "aaa_2013j",
+      "name": "Algebra Foundations (Spring 2026)",
+      "total_modules": 6,
+      "duration_weeks": 38,
+      "format": "self_paced"
+    }
+  ],
+  "mentors": [
+    {
+      "id": "mentor_01",
+      "name": "Тетяна Шкарупа",
+      "slack_id": "U001MENTOR"
+    },
+    {
+      "id": "mentor_02",
+      "name": "Артем Гордієнко",
+      "slack_id": "U002MENTOR"
+    },
+    {
+      "id": "mentor_03",
+      "name": "Ірина Лавріненко",
+      "slack_id": "U003MENTOR"
+    }
+  ],
+  "students": [
+    {
+      "id": "stud_134143",
+      "name": "Вікторія Мельник",
+      "email": "viktoriia.melnyk.134143@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_01",
+      "enrollment_date": "2025-12-26",
+      "current_module": 6,
+      "status": "completed",
+      "_persona": "FALSE_ALARM",
+      "_oulad_id": "134143",
+      "_final_result": "Distinction"
+    },
+    {
+      "id": "stud_011391",
+      "name": "Богдан Гончарук",
+      "email": "bohdan.honcharuk.11391@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_02",
+      "enrollment_date": "2025-10-24",
+      "current_module": 6,
+      "status": "completed",
+      "_persona": "PASS",
+      "_oulad_id": "11391",
+      "_final_result": "Pass"
+    },
+    {
+      "id": "stud_116692",
+      "name": "Микола Іваненко",
+      "email": "mykola.ivanenko.116692@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_03",
+      "enrollment_date": "2026-02-28",
+      "current_module": 6,
+      "status": "completed",
+      "_persona": "PASS",
+      "_oulad_id": "116692",
+      "_final_result": "Pass"
+    },
+    {
+      "id": "stud_228222",
+      "name": "Катерина Олійник",
+      "email": "kateryna.oliinyk.228222@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_01",
+      "enrollment_date": "2025-12-14",
+      "current_module": 6,
+      "status": "completed",
+      "_persona": "PASS",
+      "_oulad_id": "228222",
+      "_final_result": "Pass"
+    },
+    {
+      "id": "stud_306466",
+      "name": "Ігор Іваненко",
+      "email": "ihor.ivanenko.306466@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_02",
+      "enrollment_date": "2026-02-02",
+      "current_module": 6,
+      "status": "completed",
+      "_persona": "PASS",
+      "_oulad_id": "306466",
+      "_final_result": "Pass"
+    },
+    {
+      "id": "stud_386952",
+      "name": "Андрій Олійник",
+      "email": "andrii.oliinyk.386952@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_03",
+      "enrollment_date": "2026-02-22",
+      "current_module": 6,
+      "status": "completed",
+      "_persona": "PASS",
+      "_oulad_id": "386952",
+      "_final_result": "Pass"
+    },
+    {
+      "id": "stud_978739",
+      "name": "Тарас Петренко",
+      "email": "taras.petrenko.978739@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_01",
+      "enrollment_date": "2025-12-14",
+      "current_module": 6,
+      "status": "completed",
+      "_persona": "PASS",
+      "_oulad_id": "978739",
+      "_final_result": "Pass"
+    },
+    {
+      "id": "stud_2171627",
+      "name": "Марія Мороз",
+      "email": "mariia.moroz.2171627@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_02",
+      "enrollment_date": "2026-02-10",
+      "current_module": 6,
+      "status": "completed",
+      "_persona": "PASS",
+      "_oulad_id": "2171627",
+      "_final_result": "Pass"
+    },
+    {
+      "id": "stud_2551220",
+      "name": "Микола Ковальчук",
+      "email": "mykola.kovalchuk.2551220@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_03",
+      "enrollment_date": "2025-12-28",
+      "current_module": 6,
+      "status": "completed",
+      "_persona": "PASS",
+      "_oulad_id": "2551220",
+      "_final_result": "Pass"
+    },
+    {
+      "id": "stud_074372",
+      "name": "Микола Ткаченко",
+      "email": "mykola.tkachenko.74372@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_01",
+      "enrollment_date": "2026-02-10",
+      "current_module": 4,
+      "status": "active",
+      "_persona": "MEDIUM_RISK",
+      "_oulad_id": "74372",
+      "_final_result": "Fail"
+    },
+    {
+      "id": "stud_341872",
+      "name": "Ігор Іваненко",
+      "email": "ihor.ivanenko.341872@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_02",
+      "enrollment_date": "2026-05-19",
+      "current_module": 4,
+      "status": "active",
+      "_persona": "MEDIUM_RISK",
+      "_oulad_id": "341872",
+      "_final_result": "Fail"
+    },
+    {
+      "id": "stud_1472925",
+      "name": "Катерина Олійник",
+      "email": "kateryna.oliinyk.1472925@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_03",
+      "enrollment_date": "2026-04-21",
+      "current_module": 4,
+      "status": "active",
+      "_persona": "MEDIUM_RISK",
+      "_oulad_id": "1472925",
+      "_final_result": "Fail"
+    },
+    {
+      "id": "stud_030268",
+      "name": "Роман Петренко",
+      "email": "roman.petrenko.30268@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_01",
+      "enrollment_date": "2025-12-30",
+      "current_module": 2,
+      "status": "dropped",
+      "_persona": "HIGH_RISK",
+      "_oulad_id": "30268",
+      "_final_result": "Withdrawn"
+    },
+    {
+      "id": "stud_292923",
+      "name": "Богдан Шевченко",
+      "email": "bohdan.shevchenko.292923@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_02",
+      "enrollment_date": "2025-10-21",
+      "current_module": 2,
+      "status": "dropped",
+      "_persona": "HIGH_RISK",
+      "_oulad_id": "292923",
+      "_final_result": "Withdrawn"
+    },
+    {
+      "id": "stud_1763015",
+      "name": "Сергій Петренко",
+      "email": "serhii.petrenko.1763015@example.school",
+      "course_id": "aaa_2013j",
+      "mentor_id": "mentor_03",
+      "enrollment_date": "2026-02-02",
+      "current_module": 2,
+      "status": "dropped",
+      "_persona": "HIGH_RISK",
+      "_oulad_id": "1763015",
+      "_final_result": "Withdrawn"
+    }
+  ],
+  "homework": [
+    {
+      "student_id": "stud_134143",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-04-19T00:00:00.000Z",
+      "status": "graded",
+      "grade": 87
+    },
+    {
+      "student_id": "stud_134143",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-05-24T00:00:00.000Z",
+      "status": "graded",
+      "grade": 83
+    },
+    {
+      "student_id": "stud_134143",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-07-26T00:00:00.000Z",
+      "status": "graded",
+      "grade": 85
+    },
+    {
+      "student_id": "stud_134143",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-13T00:00:00.000Z",
+      "status": "graded",
+      "grade": 86
+    },
+    {
+      "student_id": "stud_134143",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": "2026-11-02T00:00:00.000Z",
+      "status": "graded",
+      "grade": 81
+    },
+    {
+      "student_id": "stud_134143",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_011391",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-04-19T00:00:00.000Z",
+      "status": "graded",
+      "grade": 78
+    },
+    {
+      "student_id": "stud_011391",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-05-24T00:00:00.000Z",
+      "status": "graded",
+      "grade": 85
+    },
+    {
+      "student_id": "stud_011391",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-07-25T00:00:00.000Z",
+      "status": "graded",
+      "grade": 80
+    },
+    {
+      "student_id": "stud_011391",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-12T00:00:00.000Z",
+      "status": "graded",
+      "grade": 85
+    },
+    {
+      "student_id": "stud_011391",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": "2026-10-30T00:00:00.000Z",
+      "status": "graded",
+      "grade": 82
+    },
+    {
+      "student_id": "stud_011391",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_116692",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-04-17T00:00:00.000Z",
+      "status": "graded",
+      "grade": 72
+    },
+    {
+      "student_id": "stud_116692",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-05-18T00:00:00.000Z",
+      "status": "graded",
+      "grade": 77
+    },
+    {
+      "student_id": "stud_116692",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-07-24T00:00:00.000Z",
+      "status": "graded",
+      "grade": 72
+    },
+    {
+      "student_id": "stud_116692",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-11T00:00:00.000Z",
+      "status": "graded",
+      "grade": 78
+    },
+    {
+      "student_id": "stud_116692",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": "2026-10-26T00:00:00.000Z",
+      "status": "graded",
+      "grade": 72
+    },
+    {
+      "student_id": "stud_116692",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_228222",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-04-20T00:00:00.000Z",
+      "status": "graded",
+      "grade": 71
+    },
+    {
+      "student_id": "stud_228222",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-06-01T00:00:00.000Z",
+      "status": "graded",
+      "grade": 45
+    },
+    {
+      "student_id": "stud_228222",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-08-10T00:00:00.000Z",
+      "status": "graded",
+      "grade": 67
+    },
+    {
+      "student_id": "stud_228222",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-27T00:00:00.000Z",
+      "status": "graded",
+      "grade": 66
+    },
+    {
+      "student_id": "stud_228222",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": "2026-11-02T00:00:00.000Z",
+      "status": "graded",
+      "grade": 60
+    },
+    {
+      "student_id": "stud_228222",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_306466",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-04-08T00:00:00.000Z",
+      "status": "graded",
+      "grade": 81
+    },
+    {
+      "student_id": "stud_306466",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-05-24T00:00:00.000Z",
+      "status": "graded",
+      "grade": 78
+    },
+    {
+      "student_id": "stud_306466",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-07-26T00:00:00.000Z",
+      "status": "graded",
+      "grade": 88
+    },
+    {
+      "student_id": "stud_306466",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-13T00:00:00.000Z",
+      "status": "graded",
+      "grade": 76
+    },
+    {
+      "student_id": "stud_306466",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": "2026-11-02T00:00:00.000Z",
+      "status": "graded",
+      "grade": 87
+    },
+    {
+      "student_id": "stud_306466",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_386952",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-04-20T00:00:00.000Z",
+      "status": "graded",
+      "grade": 67
+    },
+    {
+      "student_id": "stud_386952",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-05-28T00:00:00.000Z",
+      "status": "graded",
+      "grade": 63
+    },
+    {
+      "student_id": "stud_386952",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-07-26T00:00:00.000Z",
+      "status": "graded",
+      "grade": 71
+    },
+    {
+      "student_id": "stud_386952",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-21T00:00:00.000Z",
+      "status": "graded",
+      "grade": 64
+    },
+    {
+      "student_id": "stud_386952",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": "2026-11-02T00:00:00.000Z",
+      "status": "graded",
+      "grade": 75
+    },
+    {
+      "student_id": "stud_386952",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_978739",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-04-19T00:00:00.000Z",
+      "status": "graded",
+      "grade": 59
+    },
+    {
+      "student_id": "stud_978739",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-05-25T00:00:00.000Z",
+      "status": "graded",
+      "grade": 58
+    },
+    {
+      "student_id": "stud_978739",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-07-27T00:00:00.000Z",
+      "status": "graded",
+      "grade": 50
+    },
+    {
+      "student_id": "stud_978739",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-18T00:00:00.000Z",
+      "status": "graded",
+      "grade": 58
+    },
+    {
+      "student_id": "stud_978739",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": "2026-11-02T00:00:00.000Z",
+      "status": "graded",
+      "grade": 58
+    },
+    {
+      "student_id": "stud_978739",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_2171627",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-04-16T00:00:00.000Z",
+      "status": "graded",
+      "grade": 71
+    },
+    {
+      "student_id": "stud_2171627",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-05-21T00:00:00.000Z",
+      "status": "graded",
+      "grade": 67
+    },
+    {
+      "student_id": "stud_2171627",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-07-23T00:00:00.000Z",
+      "status": "graded",
+      "grade": 72
+    },
+    {
+      "student_id": "stud_2171627",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-19T00:00:00.000Z",
+      "status": "graded",
+      "grade": 70
+    },
+    {
+      "student_id": "stud_2171627",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": "2026-10-29T00:00:00.000Z",
+      "status": "graded",
+      "grade": 65
+    },
+    {
+      "student_id": "stud_2171627",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_2551220",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-04-20T00:00:00.000Z",
+      "status": "graded",
+      "grade": 77
+    },
+    {
+      "student_id": "stud_2551220",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-06-02T00:00:00.000Z",
+      "status": "graded",
+      "grade": 54
+    },
+    {
+      "student_id": "stud_2551220",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-07-27T00:00:00.000Z",
+      "status": "graded",
+      "grade": 67
+    },
+    {
+      "student_id": "stud_2551220",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-21T00:00:00.000Z",
+      "status": "graded",
+      "grade": 63
+    },
+    {
+      "student_id": "stud_2551220",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": "2026-11-02T00:00:00.000Z",
+      "status": "graded",
+      "grade": 63
+    },
+    {
+      "student_id": "stud_2551220",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_074372",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-04-23T00:00:00.000Z",
+      "status": "graded",
+      "grade": 60
+    },
+    {
+      "student_id": "stud_074372",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-05-25T00:00:00.000Z",
+      "status": "submitted",
+      "grade": 18
+    },
+    {
+      "student_id": "stud_074372",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-07-30T00:00:00.000Z",
+      "status": "graded",
+      "grade": 67
+    },
+    {
+      "student_id": "stud_074372",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-14T00:00:00.000Z",
+      "status": "graded",
+      "grade": 49
+    },
+    {
+      "student_id": "stud_074372",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_074372",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_341872",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-05-29T00:00:00.000Z",
+      "status": "graded",
+      "grade": 64
+    },
+    {
+      "student_id": "stud_341872",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-07-02T00:00:00.000Z",
+      "status": "graded",
+      "grade": 64
+    },
+    {
+      "student_id": "stud_341872",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-07-24T00:00:00.000Z",
+      "status": "graded",
+      "grade": 63
+    },
+    {
+      "student_id": "stud_341872",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-20T00:00:00.000Z",
+      "status": "graded",
+      "grade": 70
+    },
+    {
+      "student_id": "stud_341872",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": "2026-11-02T00:00:00.000Z",
+      "status": "graded",
+      "grade": 60
+    },
+    {
+      "student_id": "stud_341872",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_1472925",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": "2026-05-01T00:00:00.000Z",
+      "status": "graded",
+      "grade": 61
+    },
+    {
+      "student_id": "stud_1472925",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": "2026-05-24T00:00:00.000Z",
+      "status": "graded",
+      "grade": 54
+    },
+    {
+      "student_id": "stud_1472925",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": "2026-08-03T00:00:00.000Z",
+      "status": "graded",
+      "grade": 64
+    },
+    {
+      "student_id": "stud_1472925",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": "2026-09-14T00:00:00.000Z",
+      "status": "graded",
+      "grade": 62
+    },
+    {
+      "student_id": "stud_1472925",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": "2026-10-31T00:00:00.000Z",
+      "status": "graded",
+      "grade": 67
+    },
+    {
+      "student_id": "stud_1472925",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_030268",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_030268",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_030268",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_030268",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_030268",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_030268",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_292923",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_292923",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_292923",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_292923",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_292923",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_292923",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_1763015",
+      "hw_id": "hw_1752",
+      "module": 1,
+      "title": "TMA #1752",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-04-20",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_1763015",
+      "hw_id": "hw_1753",
+      "module": 2,
+      "title": "TMA #1753",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-05-25",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_1763015",
+      "hw_id": "hw_1754",
+      "module": 4,
+      "title": "TMA #1754",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-07-27",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_1763015",
+      "hw_id": "hw_1755",
+      "module": 6,
+      "title": "TMA #1755",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-09-14",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_1763015",
+      "hw_id": "hw_1756",
+      "module": 8,
+      "title": "TMA #1756",
+      "topic": "Tutor-Marked Assignment",
+      "deadline": "2026-11-02",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    },
+    {
+      "student_id": "stud_1763015",
+      "hw_id": "hw_1757",
+      "module": 9,
+      "title": "Exam #1757",
+      "topic": "Final Exam",
+      "deadline": "2026-12-18",
+      "submitted_at": null,
+      "status": "missed",
+      "grade": null
+    }
+  ],
+  "slack_messages": [
+    {
+      "student_id": "stud_134143",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Не бачу активності в чаті. Все ок?",
+      "sent_at": "2026-04-18T12:10:05.956Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_134143",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Завдання здав, фінальний теж планую вчасно.",
+      "sent_at": "2026-04-19T12:10:05.956Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_011391",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Хто вже почав фінальний проект?",
+      "sent_at": "2026-04-13T12:10:05.956Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_011391",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Можна питання щодо наступного завдання?",
+      "sent_at": "2026-04-21T12:10:05.956Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_011391",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Бачу регулярний прогрес — тримай темп.",
+      "sent_at": "2026-04-22T12:10:05.956Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_011391",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Хто вже почав фінальний проект?",
+      "sent_at": "2026-04-30T12:10:05.956Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_116692",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Знайшов цікаву статтю по темі цього тижня, скидаю у канал.",
+      "sent_at": "2026-04-13T12:10:05.956Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_116692",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Здав вчасно, перевірте будь ласка.",
+      "sent_at": "2026-04-21T12:10:05.956Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_116692",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Бачу регулярний прогрес — тримай темп.",
+      "sent_at": "2026-04-22T12:10:05.956Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_116692",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Знайшов цікаву статтю по темі цього тижня, скидаю у канал.",
+      "sent_at": "2026-04-30T12:10:05.956Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_228222",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Хто вже почав фінальний проект?",
+      "sent_at": "2026-04-13T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_228222",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Можна питання щодо наступного завдання?",
+      "sent_at": "2026-04-21T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_228222",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Гарна робота по останньому ДЗ!",
+      "sent_at": "2026-04-22T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_228222",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Хто вже почав фінальний проект?",
+      "sent_at": "2026-04-30T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_306466",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Знайшов цікаву статтю по темі цього тижня, скидаю у канал.",
+      "sent_at": "2026-04-13T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_306466",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Здав вчасно, перевірте будь ласка.",
+      "sent_at": "2026-04-21T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_306466",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Бачу регулярний прогрес — тримай темп.",
+      "sent_at": "2026-04-22T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_306466",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Знайшов цікаву статтю по темі цього тижня, скидаю у канал.",
+      "sent_at": "2026-04-30T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_386952",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Хто вже почав фінальний проект?",
+      "sent_at": "2026-04-13T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_386952",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Можна питання щодо наступного завдання?",
+      "sent_at": "2026-04-21T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_386952",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Бачу регулярний прогрес — тримай темп.",
+      "sent_at": "2026-04-22T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_386952",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Хто вже почав фінальний проект?",
+      "sent_at": "2026-04-30T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_978739",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Ця тема справді складна, але цікава.",
+      "sent_at": "2026-04-13T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_978739",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Дякую за фідбек по ДЗ!",
+      "sent_at": "2026-04-21T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_978739",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Бачу регулярний прогрес — тримай темп.",
+      "sent_at": "2026-04-22T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_978739",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Ця тема справді складна, але цікава.",
+      "sent_at": "2026-04-30T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_2171627",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Ця тема справді складна, але цікава.",
+      "sent_at": "2026-04-13T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_2171627",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Дякую за фідбек по ДЗ!",
+      "sent_at": "2026-04-21T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_2171627",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Гарна робота по останньому ДЗ!",
+      "sent_at": "2026-04-22T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_2171627",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Ця тема справді складна, але цікава.",
+      "sent_at": "2026-04-30T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_2551220",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Знайшов цікаву статтю по темі цього тижня, скидаю у канал.",
+      "sent_at": "2026-04-13T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_2551220",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Здав вчасно, перевірте будь ласка.",
+      "sent_at": "2026-04-21T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_2551220",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Бачу регулярний прогрес — тримай темп.",
+      "sent_at": "2026-04-22T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_2551220",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Знайшов цікаву статтю по темі цього тижня, скидаю у канал.",
+      "sent_at": "2026-04-30T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_074372",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Можна повернутися до попередньої теми? Не до кінця зрозумів.",
+      "sent_at": "2026-04-16T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_074372",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Бачу що останні ДЗ із запізненням. Все добре?",
+      "sent_at": "2026-04-17T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_074372",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Питання по тестам — чи я правильно розумію?",
+      "sent_at": "2026-04-23T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_074372",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Можна повернутися до попередньої теми? Не до кінця зрозумів.",
+      "sent_at": "2026-05-01T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_341872",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "У мене виникло питання щодо завдання.",
+      "sent_at": "2026-04-16T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_341872",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Бачу що останні ДЗ із запізненням. Все добре?",
+      "sent_at": "2026-04-17T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_341872",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Питання по тестам — чи я правильно розумію?",
+      "sent_at": "2026-04-23T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_341872",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "У мене виникло питання щодо завдання.",
+      "sent_at": "2026-05-01T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_1472925",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Можна повернутися до попередньої теми? Не до кінця зрозумів.",
+      "sent_at": "2026-04-16T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_1472925",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Запропоную додатковий матеріал по темі минулого тижня.",
+      "sent_at": "2026-04-17T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_1472925",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Хто вже здав ДЗ цього тижня?",
+      "sent_at": "2026-04-23T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_1472925",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Можна повернутися до попередньої теми? Не до кінця зрозумів.",
+      "sent_at": "2026-05-01T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_030268",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Не розумію матеріал, можна пояснити ще раз?",
+      "sent_at": "2026-04-14T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_030268",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Якщо проблема в часі — давай обговоримо, як адаптувати темп.",
+      "sent_at": "2026-04-15T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_030268",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Я подумав і, мабуть, кину курс. Дякую за все.",
+      "sent_at": "2026-04-20T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_030268",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Це нормально, що до 11 вечора сидіти?",
+      "sent_at": "2026-04-22T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_030268",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Привіт. Здається, я не встигаю по дедлайну з цим тижнем.",
+      "sent_at": "2026-05-04T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_292923",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Чесно — не можу витягнути цей темп, у мене ще робота.",
+      "sent_at": "2026-04-14T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_292923",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Можемо поговорити про твій прогрес — є питання?",
+      "sent_at": "2026-04-15T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_292923",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Не розумію матеріал, можна пояснити ще раз?",
+      "sent_at": "2026-04-20T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_292923",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Хтось теж відчуває, що темп завеликий?",
+      "sent_at": "2026-04-22T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_292923",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Я подумав і, мабуть, кину курс. Дякую за все.",
+      "sent_at": "2026-05-04T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_1763015",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Складно стало, мабуть треба зробити паузу.",
+      "sent_at": "2026-04-14T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_1763015",
+      "channel_type": "mentor_dm",
+      "is_from_student": false,
+      "message_text": "Якщо проблема в часі — давай обговоримо, як адаптувати темп.",
+      "sent_at": "2026-04-15T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_1763015",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Чесно — не можу витягнути цей темп, у мене ще робота.",
+      "sent_at": "2026-04-20T12:10:05.957Z",
+      "mentioned_mentor": true
+    },
+    {
+      "student_id": "stud_1763015",
+      "channel_type": "group_chat",
+      "is_from_student": true,
+      "message_text": "Це нормально, що до 11 вечора сидіти?",
+      "sent_at": "2026-04-22T12:10:05.957Z",
+      "mentioned_mentor": false
+    },
+    {
+      "student_id": "stud_1763015",
+      "channel_type": "mentor_dm",
+      "is_from_student": true,
+      "message_text": "Не розумію матеріал, можна пояснити ще раз?",
+      "sent_at": "2026-05-04T12:10:05.957Z",
+      "mentioned_mentor": true
+    }
+  ]
+}

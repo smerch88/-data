@@ -1,0 +1,14 @@
+{
+  "name": "proof-researcher",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Patchright-based (stealth Playwright) screenshot tool for verifying numeric claims in docs",
+  "main": "screenshot.js",
+  "scripts": {
+    "shot": "node screenshot.js",
+    "install-browsers": "npx patchright install chromium"
+  },
+  "dependencies": {
+    "patchright": "^1.59.4"
+  }
+}
