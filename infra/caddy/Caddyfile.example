@@ -1,0 +1,51 @@
+# Caddy reverse-proxy config for the VPS deployment.
+#
+# Caddy (v2+) handles TLS automatically via Let's Encrypt as long as:
+#   * The domain's A/AAAA record points to this VPS,
+#   * Ports 80 and 443 are open on the firewall,
+#   * The email address is reachable (used by Let's Encrypt for cert lifecycle).
+#
+# Install (Ubuntu 24.04):
+#   sudo apt update && sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+#   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+#   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+#   sudo apt update && sudo apt install -y caddy
+#
+# Deploy this config:
+#   sudo cp infra/caddy/Caddyfile.example /etc/caddy/Caddyfile
+#   sudo sed -i "s/__DOMAIN__/db.my-own-testing.space/" /etc/caddy/Caddyfile
+#   sudo sed -i "s/__EMAIL__/admin@example.com/" /etc/caddy/Caddyfile
+#   sudo systemctl reload caddy
+#
+# Logs: journalctl -u caddy -f
+# Verify: curl -I https://db.my-own-testing.space
+
+{
+    # Email for Let's Encrypt account.
+    email __EMAIL__
+}
+
+__DOMAIN__ {
+    # Reverse proxy to pgAdmin running in the local docker-compose stack
+    # (docker-compose binds it to 127.0.0.1:5050 when BIND_HOST=127.0.0.1).
+    reverse_proxy 127.0.0.1:5050
+
+    # Basic security headers.
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Don't leak the upstream stack.
+        -Server
+    }
+
+    # Access log (rotated by Caddy automatically).
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 50mb
+            roll_keep 5
+        }
+        format json
+    }
+}
