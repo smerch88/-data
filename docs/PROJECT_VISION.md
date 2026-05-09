@@ -48,11 +48,22 @@
 
 **Це окрема секція, не roadmap.** Тут — точний перелік того, що буде у демо для журі. Решта (ML, uplift, інтеграції) — у roadmap нижче.
 
+### Поточний стан (станом на 2026-05-09)
+
+- ✅ **Інфраструктура** — Postgres + pgAdmin у Docker, Express+Knex backend skeleton, Next.js scaffold у roadmap.
+- ✅ **БД схема** — 5 таблиць (mentors / courses / students / homework / slack_messages) через 5 Knex-міграцій.
+- ✅ **Half-real mock data** — OULAD sample залитий: 3 mentors / 1 course / 15 students / 90 homework / 61 slack_messages.
+- ✅ **Live deploy** — `https://db.my-own-testing.space` (pgAdmin за HTTPS через Caddy + Let's Encrypt/ZeroSSL, на VPS Arsenii). Backend + frontend пізніше на тому ж VPS.
+- ✅ **Empirical foundation** — 18 верифікованих proofs у `docs/proofs/` (Bloom 2σ, ITS meta-analysis, Jordan 2015, OULAD, тощо).
+- ⏳ **Multi-agent система** — 4 агенти в n8n (Спостерігач / Аналітик / Стратег / Комунікатор) — у роботі (Дмитро + Микола).
+- ⏳ **Дашборд** — UX-дизайн (Гюльзар) → Next.js (Arsenii).
+- ⏳ **Demo-story + презентація** — Еріка.
+
 ### Що показуємо на демо
 
 1. **Дашборд** для School / Course Manager: список ризикових учнів, кольорові мітки, тренд за тиждень, KPI зверху.
 2. **Профіль ризикового учня**: timeline активності + AI-пояснення ризику + рекомендована дія + готовий message-draft.
-3. **Жива історія студента** (demo-story): один з 4 синтетичних учнів проходить весь flow — від тригера до відправленого листа.
+3. **Жива історія студента** (demo-story): один з 4 учнів (3 HIGH_RISK Withdrawn + 8 Pass + 3 Fail + 1 Distinction — реальні OULAD outcome categories) проходить весь flow — від тригера до відправленого листа.
 4. **Архітектурний слайд** з 4 агентами в дії: видно, який агент що робить.
 5. **Презентація** з аргументами проблеми (Jordan 2015, ERIC), конкурентами, монетизацією, roadmap пост-хакатона.
 
@@ -69,11 +80,11 @@
 
 - **n8n workflow з 4 агентами** (Спостерігач, Аналітик, Стратег, Комунікатор) + orchestrator.
 - **Claude API** через особисту підписку Arsenii (~$10 видатків на демо).
-- **Postgres БД** (скелет уже є, схема нижче в секції 5) із синтетичними даними.
+- **Postgres БД** (скелет уже є, схема нижче в секції 5) з **гібридною mock-базою — half-real**.
 - **Next.js дашборд** на frontend.
 - **Express бекенд** (скелет є) з Knex.
-- **Хост**: VPS Arsenii.
-- **Дані**: 3 курси × 3 ментори × 15–20 студентів × ~30 днів історії, генеровані через Claude.
+- **Хост**: VPS Arsenii (deploy готовий — `https://db.my-own-testing.space` для pgAdmin).
+- **Дані**: реальний датасет **[OULAD](https://doi.org/10.6084/m9.figshare.5081998)** (Kuzilek et al. 2017, Nature Sci Data, **CC BY 4.0**, 32k студентів × 22 module-presentations × 173k assessment submissions), сампл 15 студентів з module AAA-2013J + 90 реальних homework-submissions з реальними дедлайнами, оцінками, статусами. Поверх — **синтетичні Slack-повідомлення** (61 шт.), прив'язані детерміністично до реальних engagement-патернів (HIGH_RISK → "кину курс" + тиша; PASS → регулярні питання; FALSE_ALARM → calm одиничні відповіді ментору). Повний мапінг — [data/oulad/MAPPING.md](../data/oulad/MAPPING.md).
 
 ## 4. Архітектура — Multi-agent (Hackathon)
 
@@ -85,8 +96,8 @@
                               │ REST API
                     ┌─────────▼─────────────┐
                     │  Express + Knex       │
-                    │  Postgres (синтетичні │
-                    │  дані LMS + Slack)    │
+                    │  Postgres (OULAD-real │
+                    │  + synth Slack chat)  │
                     └─────────┬─────────────┘
                               │ webhook / scheduled
                     ┌─────────▼─────────────┐
@@ -155,9 +166,9 @@
 - **Стейт через Postgres** — простіше за окремий vector DB; на масштабі демо 20 студентів все вміщується.
 - **Без кастомного orchestrator-engine** — n8n має вбудовані retry, error handling, scheduled triggers.
 
-## 5. Структура БД (синтетична для хакатона)
+## 5. Структура БД (half-real mock для хакатона)
 
-> Схема узгоджена з Nadin у Telegram-чаті 8 травня 2026. Реалістично відображає те, що буде з реальних LMS-інтеграцій після хакатона.
+> Схема узгоджена з Nadin у Telegram-чаті 8 травня 2026. **Дані — half-real**: всі поведінкові поля (registration / homework / grades / submission timing) — з реального датасету [OULAD](https://doi.org/10.6084/m9.figshare.5081998) (Open University Learning Analytics, CC BY 4.0). Імена/email/ментори/Slack-повідомлення — згенеровані синтетично, але детерміністично прив'язані до реальних паттернів поведінки. Повний мапінг кожного поля — [data/oulad/MAPPING.md](../data/oulad/MAPPING.md).
 
 ```sql
 -- students: базова інформація
@@ -225,17 +236,23 @@ login_events (
 );
 ```
 
-### Обсяг синтетичних даних для демо
+### Обсяг даних для демо (поточний стан в БД)
 
-- 3 курси (формати: bootcamp, self-paced, live)
-- 3 ментори
-- 15–20 студентів
-- ~30 днів історії
-- 150–250 login_events
-- 80–120 homework records
-- 80–150 slack_messages
+| Таблиця | Кількість | Джерело |
+|---|---|---|
+| `mentors` | 3 | синтетично (Тетяна Шкарупа / Артем Гордієнко / Ірина Лавріненко) |
+| `courses` | 1 (Algebra Foundations Spring 2026) | mapped з OULAD AAA-2013J (268 днів, 38 weeks) |
+| `students` | 15 | **OULAD real**: id_student / registration_date / final_result; синтетично — name (UA-fake) / email (трансліт) / mentor_id (round-robin) |
+| `homework` | 90 (15 × 6 assessments) | **OULAD real**: deadlines / submission_date / score / status; mapped з `assessments` + `studentAssessment` |
+| `slack_messages` | 61 | **синтетично**, але прив'язано до реального persona-поведінки (HIGH_RISK → "кину курс"; PASS → регулярні питання; FALSE_ALARM → calm одиничні DM) |
 
-Генерується через Claude (Arsenii), Маргарита перевіряє і коректує під реалістичну статистику.
+Розбивка на 4 demo-персони (див. §6.1):
+- 1 Distinction → FALSE_ALARM
+- 8 Pass → PASS / SILENT_BUT_OK mix
+- 3 Fail → MEDIUM_RISK
+- 3 Withdrawn → HIGH_RISK
+
+**Pipeline**: `npm run data:full` (одна команда) → `data/oulad/download.js` тягне 47 MB ZIP з figshare → `sample.js` семплює та генерує JSON → `01_oulad_sample.ts` (Knex seed) заливає в БД. Все ідемпотентно, [data/oulad/MAPPING.md](../data/oulad/MAPPING.md) описує кожне поле і його джерело.
 
 ## 6. Демо-сценарій
 
@@ -267,7 +284,7 @@ login_events (
 
 ### 6.3 Сигнали дропауту (польова експертиза)
 
-7-етапна послідовність, як її описала Nadin (ментор GoIT) з власної практики. Це **головний empirical input** для feature engineering AI-Спостерігача.
+7-етапна послідовність, як її описала Nadin (ментор GoIT) з власної практики. Це **головний empirical input** для feature engineering AI-Спостерігача. Повний Q&A інтерв'ю — у [docs/research/goit-interview.md](research/goit-interview.md).
 
 | # | Сигнал | Час до дропауту |
 |---|---|---|
@@ -288,7 +305,7 @@ login_events (
 | Шар | Інструмент | Чому |
 |---|---|---|
 | Backend API | Node.js + TypeScript (Express + Knex) | Скелет уже в репо |
-| БД | PostgreSQL | Скелет, синтетичні дані |
+| БД | PostgreSQL | Half-real mock з OULAD ([MAPPING.md](../data/oulad/MAPPING.md)) |
 | **AI Orchestration** | **n8n** | Visual workflow для агентів; команда (Дмитро + Микола) комфортна з low-code AI-flow |
 | LLM | Claude (Sonnet 4.6+ або Opus 4.5+) через API | Особиста підписка Arsenii ($100/міс), вистачить лімітів |
 | Frontend | Next.js + Tailwind + shadcn + Tremor + Recharts | Швидко, сучасно, OSS |
@@ -314,7 +331,7 @@ login_events (
 |---|---|---|
 | **Arsenii** | Frontend + Backend Lead + AI Integration | Дашборд, оркестрація агентів, API, інтеграція AI у продукт. Хост на власному VPS. |
 | **Дмитро + Микола** | AI Agents Engineer + n8n Orchestration | Тригери, воркфлоу, промпти, логіка кожного агента, інтеграція з Claude API |
-| **Олексій + Маргарита** | Data Analytics | Синтетичні дані 15–20 студентів × 30 днів, реалістичні сценарії, метрики |
+| **Олексій + Маргарита** | Data Analytics | Sampling/мапінг OULAD на нашу схему, валідація 4 персон, метрики дашборду (поточний sample вже залитий — наступне: розширення scenarios + uplift baseline) |
 | **Гюльзар** | Product Designer (UX) | Дизайн дашборду, екранів профілю, demo-flow візуально |
 | **Еріка** | AI Content + Presentation | Tone-of-voice для агента-Комунікатора, шаблони повідомлень, презентація, відео-демо |
 | **Nadin** | Tech Lead / BA | Координація, ТЗ, польова експертиза EdTech (досвід ментора GoIT), підхват у Arsenii |
@@ -358,13 +375,14 @@ RCT-розбивка з самого початку action layer: треба д�
 
 ### 10.1 Хакатон (10 днів)
 
-| Стаття | Сума |
-|---|---|
-| Claude API на демо | ~$10 (особистий Arsenii покриє) |
-| Claude підписка Arsenii (вже є) | $100/міс — особистий |
-| VPS для демо (вже є) | особистий Arsenii |
-| Домен + SSL | ~$15/рік (опційно) |
-| **Разом грошового видатку команди** | **~$0** (усе покрито з особистих ресурсів) |
+| Стаття | Сума | Хто покриває |
+|---|---|---|
+| Claude API на демо | **~$10** | особистий Arsenii |
+| Claude підписка | $100/міс — вже є | особистий Arsenii |
+| VPS (Ubuntu 24.04, 96 GB / 5.8 GB RAM) | вже є | особистий Arsenii |
+| Домен `my-own-testing.space` | вже є | особистий Arsenii |
+| HTTPS-cert (Let's Encrypt / ZeroSSL) | $0 — auto-issuance через Caddy | — |
+| **Разом грошового видатку команди** | **~$10** (Claude API на час хакатона) | Arsenii |
 
 ### 10.2 Софт (post-hackathon)
 
@@ -429,9 +447,9 @@ RCT-розбивка з самого початку action layer: треба д�
 | Multi-agent ловить глюки і бага | n8n + Claude може давати unstable output | Жорсткі structured outputs (JSON schema), evals на 4 demo-персонах перед finalізацією |
 | LLM hallucinations у Comunікатор-агенті | Будь-яка LLM може вигадати факти про учня | Завжди як **draft**; menедж натискає Send. Контекст агента — тільки реальні поля з БД, не свободна інтерпретація |
 | Сильна презентація > слабкий код | Команда має 10 днів і денну роботу | Nadin: фокус на стабільне demo + сильна презентація, не на технічну глибину. Складні фічі (uplift, ML) — у roadmap, не в demo |
-| Дані синтетичні → демо неправдоподібне | Журі може помітити "штучність" сценаріїв | Маргарита перевіряє, реалістичні імена і повідомлення (через Claude), 4 типи персон з різною поведінкою (включно з false-positive resistance: SILENT BUT OK + FALSE ALARM) |
+| Дані half-real → демо неправдоподібне | Журі може помітити "штучність" сценаріїв | Поведінкова частина (homework deadlines, submission dates, grades, registration) — реальна з OULAD (32k студентів Open University); тільки чати + імена синтетичні. 4 типи персон (включно з false-positive resistance: SILENT BUT OK + FALSE ALARM) — з реальних `final_result` категорій. Повний transparent-mapping у [MAPPING.md](../data/oulad/MAPPING.md) для аудиту журі. |
 | Якість ML на малих/брудних даних (post-hackathon) | Production AUC ~3 п.п. нижчий за post-hoc | На хакатоні немає ML — це не ризик. Post-hackathon: heuristic baseline → ML тільки після ≥5–10 клієнтів × ≥6 міс даних |
-| Compliance (GDPR / FERPA / COPPA) | Юридична частина не вирішується інженерно | На хакатоні — синтетичні дані, нема compliance-ризику. Юрист на ретейнер з 6-го місяця |
+| Compliance (GDPR / FERPA / COPPA) | Юридична частина не вирішується інженерно | На хакатоні — OULAD (повністю анонімізований ARX-tool, CC BY 4.0, peer-reviewed Nature) + синтетичні чати. Нульовий compliance-ризик, коректна атрибуція в [MAPPING.md](../data/oulad/MAPPING.md). Юрист на ретейнер з 6-го місяця для real-LMS інтеграцій. |
 | SOC 2 Type II (post-hackathon, enterprise) | 6–12 міс процесу | Старт SOC 2 — 9–10 місяць roadmap |
 
 **Найризикованіше місце MVP**: довести uplift від інтервенцій RCT-тестом, а не просто accuracy моделі. На хакатоні цього не показуємо — у roadmap.
@@ -452,7 +470,7 @@ RCT-розбивка з самого початку action layer: треба д�
 - Не додавати ML на хакатоні — навіть як baseline. Це з'їсть час і не дасть value на демо. ML — у roadmap.
 - Не вгадувати причини відтоку через LLM без даних. Агент-Аналітик має посилатися на конкретні факти з БД, не на здогадки.
 - Не починати з survival analysis або uplift modeling — це post-hackathon.
-- Не масштабувати інтеграції з LMS — на хакатоні дані синтетичні; реальна інтеграція — після пілота.
+- Не масштабувати інтеграції з LMS — на хакатоні дані half-real з OULAD; реальна real-time інтеграція з GoIT/Hillel/etc — після пілота.
 - Не писати своє BI з нуля — Tremor + Recharts вистачить.
 - Не додавати auth/rate-limiting/observability стек до бекенду без явного прохання — система навмисно мала.
 - Не плодити сервіси: Postgres-агрегації, не ClickHouse; pgvector у Postgres, не Pinecone — поки обсяги дозволяють.
