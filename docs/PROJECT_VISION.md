@@ -4,11 +4,11 @@
 
 ## TL;DR для Claude
 
-- **Що будуємо в хакатоні (10 днів)**: мульти-агентну AI-систему, що моніторить онлайн-школу через дані з LMS і Slack, виявляє учнів у ризику відтоку, пояснює причину, і генерує персональний message-draft для повернення. Multi-agent — це **архітектурне ядро**, без AI продукт не існує (відповідає критерію журі: AI-імплементація = 25% оцінки).
-- **Кому продаємо**: українські онлайн-школи з 100–5000 активних учнів — GoIT, Hillel ([✓ verified](#proof-hillel-courses)), Projector, Prometheus, LearnLifeLong тощо. Кожен втрачений учень = $400–2000 доходу (на основі ринкових цін українських IT-курсів — див. [Hillel proof](#proof-hillel-courses) + 3-тижневе refund-вікно як direct revenue exposure школи) + репутаційні ризики. Industry-wide signal: **EdTech має найвищий B2B SaaS churn — 9.6%/міс** ([✓ verified](#proof-edtech-saas-churn)).
-- **Чому тільки multi-agent а не ML+LLM-гібрид**: команда з 7 людей, ~10 днів після роботи, обмежений ресурс на debug + data labeling. Multi-agent через n8n працює з першого дня без training data. ML-шар (XGBoost + SHAP як попередній фільтр перед агентами) свідомо **відкладений на post-hackathon roadmap** для оптимізації unit economics. На OULAD benchmark best-published XGBoost дає **F1≈0.92 / AUC≈0.97** ([✓ verified](#proof-oulad-benchmark-2024)) як ceiling; типове *production*-значення без heavy feature engineering: F1≈0.85–0.90, AUC≈0.85–0.95 — це наша реалістична ціль для post-hackathon ML-шару.
-- **Що НЕ робимо в хакатоні**: класична ML-модель churn-prediction; survival analysis; uplift modeling; SHAP-feature attribution; production-ready scoring engine. Усе це в roadmap, але не в demo.
-- **Чим відрізняємось від MAIC ([arxiv 2508.17310](https://arxiv.org/abs/2508.17310), Aug 2025) і EdSights**: MAIC = closed AI classroom; EdSights = SMS-chatbot для US universities. Ми = **agent-as-observer над heterogeneous LMS+Slack** + **tone-of-voice draft в стилі школи** + **B2B для онлайн-шкіл 100–5,000 учнів** (underserved middle). Деталі — §2.3.
+- **Що будуємо в хакатоні (10 днів)**: мульти-агентну AI-систему, що моніторить онлайн-школу через дані з LMS і Slack, виявляє учнів у ризику відтоку, пояснює причину і генерує персональну чернетку повідомлення для повернення. Multi-agent — це **архітектурне ядро**, без AI продукт не існує (відповідає критерію журі: AI-імплементація = 25% оцінки).
+- **Кому продаємо**: українським онлайн-школам з 100–5000 активних учнів — GoIT, Hillel ([✓ verified](#proof-hillel-courses)), Projector, Prometheus, LearnLifeLong тощо. Кожен втрачений учень = $400–2000 доходу (на основі ринкових цін українських IT-курсів — див. [Hillel proof](#proof-hillel-courses) + 3-тижневе вікно повернення коштів як прямий revenue exposure школи) + репутаційні ризики. Сигнал по всій галузі: **EdTech має найвищий B2B SaaS churn — 9.6%/міс** ([✓ verified](#proof-edtech-saas-churn)).
+- **Чому тільки multi-agent а не ML+LLM-гібрид**: команда з 7 людей, ~10 днів після основної роботи, обмежений ресурс на дебаг + розмітку даних. Multi-agent через n8n працює з першого дня без тренувальних даних. ML-шар (XGBoost + SHAP як попередній фільтр перед агентами) свідомо **відкладений у пост-хакатон-дорожню-карту** для оптимізації unit economics. На OULAD-бенчмарку найкращий опублікований XGBoost дає **F1≈0.92 / AUC≈0.97** ([✓ verified](#proof-oulad-benchmark-2024)) як стелю; типове *production*-значення без важкого feature engineering: F1≈0.85–0.90, AUC≈0.85–0.95 — це наша реалістична ціль для пост-хакатон ML-шару.
+- **Що НЕ робимо на хакатоні**: класичну ML-модель прогнозу дропауту; survival analysis; uplift modeling; SHAP-feature attribution; production-ready scoring engine. Усе це в дорожній карті, але не в демо.
+- **Чим відрізняємось від MAIC ([arxiv 2508.17310](https://arxiv.org/abs/2508.17310), Aug 2025) і EdSights**: MAIC = закрита AI-класна; EdSights = SMS-chatbot для US-університетів. Ми = **агент-спостерігач над гетерогенним LMS+Slack** + **чернетка у tone-of-voice школи** + **B2B для онлайн-шкіл 100–5,000 учнів** (underserved middle). Деталі — §2.3.
 
 ## 1. Концепція
 
@@ -31,15 +31,15 @@
 
 ### Чому AI multi-agent — це наукова база, не маркетинг
 
-- **Сучасний tutoring meta-analysis (Nickow, Oreopoulos & Quan 2024 AERJ)** [✓ verified](#proof-nickow-tutoring-meta): peer-reviewed публікація в *American Educational Research Journal* 61(1):74–107 ([DOI 10.3102/00028312231208687](https://journals.sagepub.com/doi/10.3102/00028312231208687)) → **pooled effect size 0.29σ на 89 RCT/quasi-experimental tutoring-програмах PreK-12, 732 effect estimates**. Це **оновлення вниз** від 0.37σ / ~96 studies, що публікувалися як NBER working paper 2020 ([w27476](https://www.nber.org/papers/w27476)) — peer-review зрізав headline-цифру. Журі-defensible — 0.29σ. Heterogeneity з paper: ефект більший у teacher/paraprofessional vs volunteer/parent tutors; найбільший у earlier grades; in-school > after-school; ≥3 days/week дає сильніший ефект. Жодне з 89 досліджень не відтворило Bloom 2σ — це інтерпретація pooled-результатів (~5× менше за 2σ), не verbatim-claim з абстракту.
-- **Bloom's 2-sigma problem (1984)** [✓ verified](#proof-bloom-2-sigma): історичний орієнтир (50-й → 98-й перцентиль) **сильно оспорений модерними реплікаціями**. Оригінальний 2σ-ефект частково зумовлений mastery-threshold дизайном (tutees мали 90% бар, control — без бару). Залишаємо як rhetorical anchor для проблеми "scalable 1:1", не як обіцянку ефекту.
+- **Сучасний мета-аналіз tutoring (Nickow, Oreopoulos & Quan 2024 AERJ)** [✓ verified](#proof-nickow-tutoring-meta): peer-reviewed публікація в *American Educational Research Journal* 61(1):74–107 ([DOI 10.3102/00028312231208687](https://journals.sagepub.com/doi/10.3102/00028312231208687)) → **pooled effect size 0.29σ на 89 RCT/квазі-експериментальних tutoring-програмах PreK-12, 732 оцінки ефекту**. Це **оновлення вниз** від 0.37σ / ~96 досліджень, що публікувалися як NBER working paper 2020 ([w27476](https://www.nber.org/papers/w27476)) — peer-review зрізав headline-цифру. Захищене перед журі — 0.29σ. Гетерогенність із paper: ефект більший у teacher/paraprofessional vs volunteer/parent tutors; найбільший у молодших класах; у школі > після школи; ≥3 днів/тиждень дає сильніший ефект. Жодне з 89 досліджень не відтворило Bloom 2σ — це інтерпретація pooled-результатів (~5× менше за 2σ), не verbatim-claim з абстракту.
+- **Bloom's 2-sigma problem (1984)** [✓ verified](#proof-bloom-2-sigma): історичний орієнтир (50-й → 98-й перцентиль) **сильно оспорений сучасними реплікаціями**. Оригінальний 2σ-ефект частково зумовлений дизайном з mastery-порогом (tutees мали 90%-бар, control — без бару). Залишаємо як риторичний якір для проблеми "масштабоване 1:1", не як обіцянку ефекту.
 - **VanLehn 2011** [✓ verified](#proof-intelligent-tutoring-wiki): human tutors → **0.79σ**, step-based ITS → **0.76σ** (28 порівнянь), answer-based ITS → **0.31σ** (165 досліджень), substep-based ITS → 0.40σ. Тобто реальні step-based AI-tutors статистично близькі до експертів-людей, але не до Bloom-овського 2σ.
 - **Modern ITS meta-analysis (Kulik & Fletcher 2016)** [✓ verified](#proof-intelligent-tutoring-wiki): 50 контрольованих експериментів → median ES **0.66σ** (50-й → 75-й перцентиль), перемога у 92% порівнянь. **Caveat**: на локально розроблених тестах ES 0.73, на стандартизованих — лише **0.13**. K-12 контекст: K-12 math у Kulik & Fletcher показав ES 0.40 SD (0.10 на стандартизованих); Steenbergen-Hu & Cooper 2013 на тих же K-12 math студіях знайшли ~0 — тобто K-12 evidence **contested**, а не одностайно сильний.
-- **Реалістичний таргет нашого продукту**: **7–15% reduction in dropout у пілоті**, з валідацією точного значення на real data. Замість back-of-envelope multiplier'а використовуємо **bracket між двома найближчими аналогами** (обидва peer-reviewed):
-  - **Floor — chatbot baseline**: EdSights SMS-chatbot для at-risk students → **+7% avg retention** ([✓](#proof-edsights), 250+ US universities, **без human-in-the-loop**). Це мінімум "автоматизований outreach без особистого дотику" — нижче ми не маємо опуститися, бо додаємо менеджера, що особистіше за template-bot.
-  - **Ceiling — tutoring baseline**: full live tutoring (Nickow AERJ 2024 0.29σ + Kulik 2016 ITS 0.66σ) → ~15–25% reduction in dropout at maximum intensity. Це максимум "персистентний 1:1 контакт" — вище ми не дотягнемо, бо ми не tutoring (1 message + manager send ≠ 3 сесії/тиждень з персистентними відносинами).
-  - **Наша позиція**: chatbot-with-human-relay — особистіше за SMS-bot (manager-tailored draft, не template), слабше за live tutor (нижча intensity, лише outreach-trigger). Очікуємо **середню частину bracket'а**; пілот валідує exact value через approval rate × manager engagement × frequency-of-send (§13 metrics).
-  - **На презентації говоримо 7–15%, з honest caveat "exact value validated in pilot"**, а не точкову обіцянку. Це сильніше за "10-15% бо tutoring × multiplier" — обидва кінці bracket'а мають peer-reviewed citation, intermediate point — measurable hypothesis з explicit pilot test.
+- **Реалістичний таргет нашого продукту**: **7–15% зниження дропауту в пілоті**, з валідацією точного значення на реальних даних. Замість back-of-envelope-множника використовуємо **діапазон між двома найближчими аналогами** (обидва peer-reviewed):
+  - **Нижня межа — chatbot baseline**: EdSights SMS-chatbot для at-risk-студентів → **+7% avg retention** ([✓](#proof-edsights), 250+ US universities, **без human-in-the-loop**). Це мінімум "автоматизоване звернення без особистого дотику" — нижче ми не маємо опуститися, бо додаємо менеджера, що особистіше за template-бота.
+  - **Верхня межа — tutoring baseline**: повноцінний live tutoring (Nickow AERJ 2024 0.29σ + Kulik 2016 ITS 0.66σ) → ~15–25% зниження дропауту при максимальній інтенсивності. Це максимум "персистентний контакт 1:1" — вище ми не дотягнемо, бо ми не tutoring (1 повідомлення + manager send ≠ 3 сесії/тиждень з персистентними відносинами).
+  - **Наша позиція**: chatbot-з-людиною-в-петлі — особистіше за SMS-бота (драфт під конкретного учня, не шаблон), слабше за живого тьютора (нижча інтенсивність, лише тригер-звернення). Очікуємо **середню частину діапазону**; пілот валідує точне значення через approval rate × manager engagement × frequency-of-send (метрики у §13).
+  - **На презентації говоримо 7–15%, з чесним застереженням "exact value validated in pilot"**, а не точкову обіцянку. Це сильніше за "10-15% бо tutoring × multiplier" — обидва кінці діапазону мають peer-reviewed citation, проміжна точка — вимірювана гіпотеза з explicit pilot test.
 
 ## 2. Диференціація проти конкурентів
 
@@ -65,69 +65,71 @@
 
 ### 2.3 Наша унікальна позиція (wedge)
 
-Ми **не tutor-replacement** і **не chatbot**. Ми **agent-as-observer над heterogeneous data plane** + **human-in-the-loop action layer**. Чотири фічі, які жоден з вище-перелічених не комбінує:
+Ми **не заміна тьютора** і **не chatbot**. Ми **агент-спостерігач над гетерогенним шаром даних** + **шар дії з людиною-в-петлі (human-in-the-loop)**. Чотири фічі, які жоден з вище-перелічених не комбінує:
 
-1. **Cross-channel observation**: агент читає Slack DM + group chat + support channel + LMS events як єдиний стрім, корелює signals 1–7 (§6.3). EdSights/Civitas → single channel; MAIC → closed classroom.
-2. **Heterogeneous LMS/Slack tenant**: побудовано так, що школа підключає **свої** Thinkific/Teachable/Moodle/custom LMS і **свій** Slack/Discord без міграції на нашу платформу. EdSights/Civitas/PowerSchool → проприетарна платформа.
-3. **Tone-of-voice agent (Комунікатор)**: draft message пишеться **в стилі конкретної школи** (configurable). EdSights → стандартний chatbot tone; MAIC → universal AI prompt; Civitas → workflow templates без AI-генерації тексту.
-4. **False-positive resistance by design**: 4-persona test set (HIGH/MEDIUM/SILENT-BUT-OK/FALSE-ALARM, §6.1) перетинається з реальними OULAD `final_result` категоріями. **Доводимо журі і клієнтам не лише "ловить ризик", а й "не флагує невинних"** — вимога, яку single-channel chatbot-и обходять стороною.
-5. **B2B segment "underserved middle"**: 100–5,000 students → надто малий для Civitas/Starfish (university scale), надто великий для Excel-ментора. EdSights в цьому сегменті ходить, але через US universities — **український/EU мід-сегмент онлайн-шкіл відкритий**.
+1. **Спостереження через канали (cross-channel)**: агент читає Slack DM + груповий чат + support-канал + LMS-події як єдиний потік, корелює сигнали 1–7 (§6.3). EdSights/Civitas → один канал; MAIC → закрита AI-класна.
+2. **Гетерогенні LMS/Slack-тенанти**: побудовано так, що школа підключає **свої** Thinkific/Teachable/Moodle/власну LMS і **свій** Slack/Discord без міграції на нашу платформу. EdSights/Civitas/PowerSchool → пропрієтарна платформа.
+3. **Агент tone-of-voice (Комунікатор)**: чернетка повідомлення пишеться **в стилі конкретної школи** (конфігурується). EdSights → стандартний chatbot-тон; MAIC → універсальний AI-промпт; Civitas → workflow-шаблони без AI-генерації тексту.
+4. **Стійкість до false-positive за дизайном**: тестовий набір з 4 персон (HIGH/MEDIUM/SILENT-BUT-OK/FALSE-ALARM, §6.1) перетинається з реальними категоріями `final_result` з OULAD. **Доводимо журі і клієнтам не лише "ловить ризик", а й "не флагує невинних"** — вимога, яку single-channel chatbot-и обходять стороною.
+5. **B2B-сегмент "underserved middle"**: 100–5,000 учнів → надто малий для Civitas/Starfish (university scale), надто великий для Excel-ментора. EdSights у цьому сегменті ходить, але через US-університети — **український/EU мід-сегмент онлайн-шкіл відкритий**.
 
-**Wedge ≠ moat (чесно про defensibility).** Усі 5 пунктів вище — позиціонування і execution-перевага, не технічний моат. Конкурент-клон з ресурсами може повторити cross-channel + tone-of-voice за 2–3 спринти. **Реальна defensibility будується пост-пілот:** (a) RCT-validated uplift на українському EdTech-сегменті як пропрієтарна training data для uplift-моделі, (b) глибина LMS/Slack-інтеграцій, де переключення дорожче за нашу підписку. Day one жодного з цих немає — це нормально для $300/міс ICP, не для enterprise. Журі і pilot-клієнтам говоримо це прямо: ми робимо ставку на **first-mover + RCT-data flywheel**, не на технологічний секрет.
+**Wedge ≠ moat — чесно про defensibility.** Усі 5 пунктів вище — позиціонування і перевага виконання, не технічний moat. Конкурент-клон з ресурсами може повторити cross-channel + tone-of-voice за 2–3 спринти. **Реальний moat будується після пілоту:** (a) RCT-валідований uplift на українському EdTech-сегменті як пропрієтарні дані для uplift-моделі, (b) глибина LMS/Slack-інтеграцій, де переключитися коштує дорожче за нашу підписку. На day one жодного з цих немає — це нормально для $300/міс ICP, не для enterprise. Журі і pilot-клієнтам говоримо це прямо: ми робимо ставку на **first-mover + RCT-data flywheel**, не на технологічний секрет.
 
 **Однорядковий pitch**: ми будуємо те, що Civitas Learning робить для університетів, **в B2B-форматі для онлайн-шкіл 100–5,000 учнів**, з **observation-mode multi-agent поверх живої Slack/LMS-економіки** замість запитів-через-chatbot.
 
-## 3. Hackathon Scope — що саме розробляємо до 18 травня
+## 3. Обсяг хакатону — що саме розробляємо до 18 травня
 
-**Це окрема секція, не roadmap.** Тут — точний перелік того, що буде у демо для журі. Решта (ML, uplift, інтеграції) — у roadmap нижче.
+**Це окрема секція, не дорожня карта.** Тут — точний перелік того, що буде у демо для журі. Решта (ML, uplift, інтеграції) — у дорожній карті нижче (§13).
 
 ### Поточний стан (станом на 2026-05-09)
 
-- ✅ **Інфраструктура** — Postgres + pgAdmin у Docker, Express+Knex backend skeleton, Next.js scaffold у roadmap.
-- ✅ **БД схема** — 5 таблиць (mentors / courses / students / homework / slack_messages) через 5 Knex-міграцій.
-- ✅ **Half-real mock data** — OULAD sample залитий: 3 mentors / 1 course / 15 students / 90 homework / 61 slack_messages.
-- ✅ **Live deploy** — `https://db.my-own-testing.space` (pgAdmin за HTTPS через Caddy + Let's Encrypt/ZeroSSL, на VPS Arsenii). Backend + frontend пізніше на тому ж VPS.
-- ✅ **Empirical foundation** — 18 верифікованих proofs у `docs/proofs/` (Bloom 2σ, ITS meta-analysis, Jordan 2015, OULAD, тощо).
-- ⏳ **Multi-agent система** — 4 агенти в n8n (Спостерігач / Аналітик / Стратег / Комунікатор) — у роботі (Дмитро + Микола).
+- ✅ **Інфраструктура** — Postgres + pgAdmin у Docker, скелет бекенду на Express+Knex, заскафолджений Next.js — у дорожній карті.
+- ✅ **Схема БД** — 5 таблиць (mentors / courses / students / homework / slack_messages) через 5 Knex-міграцій.
+- ✅ **Напів-реальні mock-дані** — OULAD sample залитий: 3 ментори / 1 курс / 15 учнів / 90 ДЗ / 61 Slack-повідомлення.
+- ✅ **Live deploy** — `https://db.my-own-testing.space` (pgAdmin за HTTPS через Caddy + Let's Encrypt/ZeroSSL, на VPS Arsenii). Бекенд + фронтенд пізніше на тому ж VPS.
+- ✅ **Емпіричний фундамент** — 18 верифікованих proofs у `docs/proofs/` (Bloom 2σ, ITS meta-analysis, Jordan 2015, OULAD, тощо).
+- ⏳ **Multi-agent система** — 4 агенти у n8n (Спостерігач / Аналітик / Стратег / Комунікатор) — у роботі (Дмитро + Микола).
 - ⏳ **Дашборд** — UX-дизайн (Гюльзар) → Next.js (Arsenii).
-- ⏳ **Demo-story + презентація** — Еріка.
+- ⏳ **Сценарій демо + презентація** — Еріка.
 
 ### Що показуємо на демо
 
 1. **Дашборд** для School / Course Manager: список ризикових учнів, кольорові мітки, тренд за тиждень, KPI зверху.
-2. **Профіль ризикового учня**: timeline активності + AI-пояснення ризику + рекомендована дія + готовий message-draft.
-3. **Жива історія студента** (demo-story): один з 4 учнів (3 HIGH_RISK Withdrawn + 8 Pass + 3 Fail + 1 Distinction — реальні OULAD outcome categories) проходить весь flow — від тригера до відправленого листа.
+2. **Профіль ризикового учня**: таймлайн активності + AI-пояснення ризику + рекомендована дія + готова чернетка повідомлення (draft).
+3. **Жива історія студента** (demo-story): один з 4 учнів (3 HIGH_RISK Withdrawn + 8 Pass + 3 Fail + 1 Distinction — реальні категорії результатів з OULAD) проходить весь сценарій — від тригера до надісланого листа.
 4. **Архітектурний слайд** з 4 агентами в дії: видно, який агент що робить.
-5. **Презентація** з аргументами проблеми (Jordan 2015, ERIC), конкурентами, монетизацією, roadmap пост-хакатона.
+5. **Презентація** з аргументами проблеми (Jordan 2015, ERIC), конкурентами, монетизацією, дорожньою картою після хакатону.
 
 ### Що НЕ показуємо (свідомо)
 
-- ML churn-prediction модель (XGBoost / LightGBM).
-- SHAP feature attribution.
+- ML-модель прогнозу дропауту (XGBoost / LightGBM).
+- Атрибуцію фічей через SHAP.
 - Survival analysis / uplift modeling.
 - Реальну інтеграцію зі справжніми LMS / Slack.
-- A/B testing engine.
-- Self-serve onboarding.
+- Engine для A/B-тестування.
+- Самостійний онбординг (self-serve onboarding).
 
 ### Технічний обсяг
 
-- **n8n workflow з 4 агентами** (Спостерігач, Аналітик, Стратег, Комунікатор) + orchestrator.
+- **Workflow у n8n з 4 агентами** (Спостерігач, Аналітик, Стратег, Комунікатор) + оркестратор.
 - **Claude API** через особисту підписку Arsenii (~$10 видатків на демо).
-- **Postgres БД** (скелет уже є, схема нижче в секції 5) з **гібридною mock-базою — half-real**.
-- **Next.js дашборд** на frontend.
-- **Express бекенд** (скелет є) з Knex.
+- **Postgres БД** (скелет уже є, схема нижче в секції 5) з **гібридною mock-базою — напів-реальною (half-real)**.
+- **Дашборд на Next.js** для фронтенду.
+- **Бекенд на Express** (скелет є) з Knex.
 - **Хост**: VPS Arsenii (deploy готовий — `https://db.my-own-testing.space` для pgAdmin).
-- **Дані**: реальний датасет **[OULAD](https://doi.org/10.6084/m9.figshare.5081998)** (Kuzilek et al. 2017, Nature Sci Data, **CC BY 4.0**, 32k студентів × 22 module-presentations × 173k assessment submissions), сампл 15 студентів з module AAA-2013J + 90 реальних homework-submissions з реальними дедлайнами, оцінками, статусами. Поверх — **синтетичні Slack-повідомлення** (61 шт.), прив'язані детерміністично до реальних engagement-патернів (HIGH_RISK → "кину курс" + тиша; PASS → регулярні питання; FALSE_ALARM → calm одиничні відповіді ментору). Повний мапінг — [data/oulad/MAPPING.md](../data/oulad/MAPPING.md).
+- **Дані**: реальний датасет **[OULAD](https://doi.org/10.6084/m9.figshare.5081998)** (Kuzilek et al. 2017, Nature Sci Data, **CC BY 4.0**, 32k студентів × 22 модуль-презентації × 173k подач робіт), сампл з 15 студентів з модуля AAA-2013J + 90 реальних подач ДЗ з реальними дедлайнами, оцінками, статусами. Поверх — **синтетичні Slack-повідомлення** (61 шт.), прив'язані детерміністично до реальних патернів залученості (HIGH_RISK → "кину курс" + тиша; PASS → регулярні питання; FALSE_ALARM → спокійні одиничні відповіді ментору). Повний мапінг — [data/oulad/MAPPING.md](../data/oulad/MAPPING.md).
+- **⚠️ OULAD-контекст caveat (важливо для журі і для пілоту)**: OULAD = **Open University UK** (акредитований університет, дорослі part-time-студенти, 38-тижневий семестровий формат, модуль AAA = соціальні науки). Наш ICP = **інтенсивні bootcamps 12 тижнів** (Hillel/GoIT/Projector) з live-сесіями і Slack-комюніті. Патерни дропауту **різні за природою**: OU → повільне затухання через життєві обставини за тижні; bootcamp → швидке когнітивне перевантаження у перші 2-4 тижні. **OULAD у нас = поведінковий субстрат** (часові патерни реальні, дані реальні), але **7-етапна сигма-послідовність Nadin (§6.3) — bootcamp-specific і НЕ валідована на OU-когорті**. Перенесення сигналів на реальний bootcamp-ICP — гіпотеза, яку валідуватиме пілот, не доведений мапінг. На демо журі говоримо це прямо у слайді про дані, не ховаємо.
+- **Вторинне джерело чатів (опційно для розширення сампла)**: реальна мова фрустрації з публічних Reddit-тредів (r/learnprogramming, r/cscareerquestions, r/csMajors, Stack Overflow Meta) — як **доповнення** до повністю своїх синтетичних повідомлень. Це знімає ризик circular demo: лінгвістичні патерни реальні (студенти реально пишуть про свої труднощі), лише прив'язка до OULAD-персон синтетична. Цитування Reddit — compliant (публічні треди), без передачі PII.
 
-## 4. Архітектура — Multi-agent (Hackathon)
+## 4. Архітектура — Multi-agent (на хакатон)
 
 ### 4.0 Чому 4 агенти (а не один великий промпт)
 
-Декомпозиція не довільна і не "архітектурний театр" — кожен агент відрізняється по **scope даних** і **token-budget**:
+Декомпозиція не довільна і не "архітектурний театр" — кожен агент відрізняється за **обсягом даних** і **бюджетом токенів**:
 
-- **Спостерігач + Аналітик мають різний обсяг входу.** Спостерігач сканує **7-денне вікно** по **всім** активним студентам школи (filter step, дешеві prompts, дублюється часто) → output: severity scores. Аналітик читає **30-денний крос-табличний контекст** (3 таблиці × 30 днів × full chat history) лише по **flagged students з severity ≥ 5** (deep step, дорогий prompt, рідкісний). Об'єднання їх в один промпт = або token explosion (30-day deep-context для всієї бази на кожному скані), або поверхневий аналіз (7 днів усім, чого не вистачає для діагнозу). Це **не два кути на ті самі дані** — це різні data-pipelines.
-- **Стратег + Комунікатор розділені по аудитованості.** Action-selection (policy) і message-generation (text) технічно можна злити в один промпт ("обери дію + напиши драфт"). Розділення дає: (a) аудит "чому саме ця дія" окремо від "як це сформульовано" — менеджер бачить rationale без впливу tone-формулювань, (b) A/B на rivane tone без зміни action policy, (c) можливість кешувати action і регенерувати тільки текст при зміні tone-of-voice.
-- **Чесно**: розділення Стратега і Комунікатора — defensible, але не критичне. Якщо token-cost буде проблемою у production, їх можна злити; розділення Спостерігача і Аналітика — критичне і не перемежовується.
+- **Спостерігач + Аналітик мають різний обсяг входу.** Спостерігач сканує **7-денне вікно** по **всіх** активних студентах школи (крок-фільтр, дешеві промпти, дублюється часто) → вихід: severity scores. Аналітик читає **30-денний крос-табличний контекст** (3 таблиці × 30 днів × повна історія чатів) лише по **flagged-студентах з severity ≥ 5** (глибокий крок, дорогий промпт, рідкісний). Об'єднання їх в один промпт = або вибух токенів (30-денний глибокий контекст для всієї бази на кожному скані), або поверхневий аналіз (7 днів усім, чого не вистачає для діагнозу). Це **не два кути на ті самі дані** — це різні дата-конвеєри (data-pipelines).
+- **Стратег + Комунікатор розділені за аудитованістю.** Вибір дії (policy) і генерацію тексту (text generation) технічно можна злити в один промпт ("обери дію + напиши чернетку"). Розділення дає: (a) аудит "чому саме ця дія" окремо від "як це сформульовано" — менеджер бачить обґрунтування без впливу tone-формулювань, (b) A/B на рівні тону без зміни policy, (c) можливість кешувати дію і регенерувати тільки текст при зміні tone-of-voice.
+- **Чесно**: розділення Стратега і Комунікатора — захищене, але не критичне. Якщо вартість токенів буде проблемою на проді, їх можна злити; розділення Спостерігача і Аналітика — критичне і не перетинається.
 
 ```
                     ┌───────────────────────┐
@@ -168,19 +170,19 @@
 ```
 
 ### 4.1 Агент-Спостерігач
-- **Тригер**: scheduled (раз на день) або event-driven (новий LMS-event / Slack-message → webhook).
-- **Вхід**: **multi-source 7-денне вікно** по студенту:
-  - **Primary (real OULAD signals)**: homework records (deadlines, submissions, grades, статуси), LMS login/access events.
-  - **Secondary (синтетичні Slack-чати на хакатоні; real chats у пілоті)**: повідомлення з трьох типів каналів — mentor_dm, group_chat, support_chat.
-  - На демо це важливо: **первинні сигнали ризику походять з real OULAD-даних** (homework + LMS-events), чати додають контекст і фразеологію. Це нівелює ризик "circular demo на власноручно написаних чатах".
-- **Логіка**: prompt-classifier на Claude — шукає тривожні сигнали з 7-етапної послідовності (з власної експертизи Nadin як ментора GoIT, див. [§6.3](#63-сигнали-дропауту-польова-експертиза)). 4 з 7 сигналів — LMS/homework-based (real); 3 — chat-based (контекст):
-  1. ДЗ із запізненням *(homework, real)*
-  2. Пропустив 1–2 уроки з викладачем *(LMS events, real)*
-  3. Перестав ставити питання *(chat, контекст)*
-  4. Не здав ДЗ взагалі *(homework, real)*
-  5. Не заходив у LMS >7 днів *(LMS events, real)*
-  6. Негативні повідомлення ("складно", "кину", "не встигаю") *(chat, контекст)*
-  7. Не відповідає на ПП ментора *(chat, контекст)*
+- **Тригер**: за розкладом (scheduled, раз на день) або керований подіями (новий LMS-event / Slack-повідомлення → webhook).
+- **Вхід**: **7-денне вікно з кількох джерел (multi-source)** по студенту:
+  - **Головне (реальні сигнали з OULAD)**: записи ДЗ (дедлайни, подачі, оцінки, статуси), події логіну та доступу до LMS.
+  - **Допоміжне (синтетичні Slack-чати на хакатоні; реальні чати у пілоті)**: повідомлення з трьох типів каналів — mentor_dm, group_chat, support_chat.
+  - На демо це важливо: **головні сигнали ризику походять із реальних OULAD-даних** (ДЗ + LMS-події), чати додають контекст і фразеологію. Це нівелює ризик "circular demo на власноручно написаних чатах".
+- **Логіка**: prompt-класифікатор на Claude — шукає тривожні сигнали з 7-етапної послідовності (з власної експертизи Nadin як ментора GoIT, див. [§6.3](#63-сигнали-дропауту-польова-експертиза)). 4 з 7 сигналів — на основі LMS/ДЗ (реальні); 3 — на основі чатів (контекст):
+  1. ДЗ із запізненням *(ДЗ, реальне)*
+  2. Пропустив 1–2 уроки з викладачем *(LMS-події, реальне)*
+  3. Перестав ставити питання *(чат, контекст)*
+  4. Не здав ДЗ взагалі *(ДЗ, реальне)*
+  5. Не заходив у LMS >7 днів *(LMS-події, реальне)*
+  6. Негативні повідомлення ("складно", "кину", "не встигаю") *(чат, контекст)*
+  7. Не відповідає на ПП ментора *(чат, контекст)*
 - **Вихід**: список (student_id, signal_type, severity 0–10) → передається оркестратору.
 
 ### 4.2 Агент-Аналітик
@@ -200,15 +202,16 @@
 - **Вихід**: (action_type, expected_lift_qualitative, rationale).
 
 ### 4.4 Агент-Комунікатор
-- **Вхід**: action_type + student profile + школьний tone-of-voice (з конфігурації).
-- **Логіка**: Claude-агент генерує чернетку повідомлення в стилі школи. Завжди — як draft, ніколи не відправляється автоматично. Менеджер натискає "Send" після перегляду.
-- **Вихід**: textual draft (не markdown — рідний формат каналу: Slack/Email).
+- **Вхід**: action_type + профіль студента + tone-of-voice школи (з конфігурації).
+- **Логіка**: Claude-агент генерує чернетку повідомлення в стилі школи. Завжди — як чернетка (draft), ніколи не відправляється автоматично. Менеджер натискає "Send" після перегляду.
+- **Вихід**: текстова чернетка (не markdown — рідний формат каналу: Slack/Email).
+- **Конфігурація tone-of-voice (operational detail)**: тон задається через **конфіг для кожної школи** з двох частин — (a) **5-10 прикладів реальних повідомлень школи** студентам (зібраних під час онбордингу як few-shot examples у промпті), (b) **дескриптор тону** (формальний / дружній / mentoring / peer; UA / EN / mix; з емодзі чи без). Це не fine-tuning — це prompt-injection з прикладами. Витрата часу на онбординг: **2-5 годин на школу** (збір прикладів + написання дескриптора + sanity-перевірка на 5-10 чернетках). На демо ми пишемо приклади самі (Еріка); для пілоту — школа надає приклади як частину обміну на безкоштовний пілот (§13.1). Самостійний tone-онбординг (де школа сама завантажує приклади у дашборд) — пост-хакатон, у фазі масштабування §13.
 
-### 4.5 Чому саме така архітектура (не custom Python)
-- **n8n** — visual workflow tool, низький bar to entry для команди. Дмитро + Микола як AI-engineers будують flow без heavy backend.
-- **Claude через abstraction layer** — vendor-agnostic, можна свопнути на GPT/Gemini.
-- **Стейт через Postgres** — простіше за окремий vector DB; на масштабі демо 20 студентів все вміщується.
-- **Без кастомного orchestrator-engine** — n8n має вбудовані retry, error handling, scheduled triggers.
+### 4.5 Чому саме така архітектура (не власний Python)
+- **n8n** — візуальний workflow-інструмент, низький поріг входу для команди. Дмитро + Микола як AI-інженери будують flow без важкого бекенду.
+- **Claude через шар абстракції** — vendor-agnostic, можна перемкнути на GPT/Gemini.
+- **Стан через Postgres** — простіше за окремий vector DB; на масштабі демо у 20 студентів все вміщується.
+- **Без власного оркестратора** — n8n має вбудовані retry, обробку помилок, тригери за розкладом.
 
 ## 5. Структура БД (half-real mock для хакатона)
 
@@ -307,22 +310,22 @@ login_events (
 | Тип | Поведінка | Скільки осіб | Що має побачити AI |
 |---|---|---|---|
 | **HIGH RISK** ("герой-студент") | Не здав 2–3 ДЗ підряд; не заходив 5–7 днів; останні повідомлення: "не встигаю", "складно", "мабуть кину"; майже не пише ментору | 1–2 | Виявити негайно, рекомендувати дзвінок + персональну підтримку |
-| **MEDIUM RISK** | Активність падає; ДЗ із запізненням; в повідомленнях втома | 3–4 | Виявити, рекомендувати soft-touch (email-нагадування, додатковий матеріал) |
-| **SILENT BUT OK** | Мало пише в чаті, але стабільно здає ДЗ і регулярно заходить | 1–2 | **НЕ** позначити як ризиковий — показує, що ми розумніші за просте правило "мовчить = біда" |
-| **FALSE ALARM** | Довго не писав, але недавно здав усе добре | 1 | **НЕ** позначити — показує здатність системи переглянути ризик при позитивному сигналі |
+| **MEDIUM RISK** | Активність падає; ДЗ із запізненням; у повідомленнях втома | 3–4 | Виявити, рекомендувати м'який дотик (email-нагадування, додатковий матеріал) |
+| **SILENT BUT OK** | Мало пише в чаті, але стабільно здає ДЗ і регулярно заходить | 1–2 | **НЕ** позначити як ризикового — показує, що ми розумніші за просте правило "мовчить = біда" |
+| **FALSE ALARM** | Довго не писав, але нещодавно здав усе добре | 1 | **НЕ** позначити — показує здатність системи переглянути ризик при позитивному сигналі |
 
-### 6.2 User Flow дашборду (8 кроків)
+### 6.2 Сценарій дашборду (8 кроків)
 
 Узгоджено з Nadin, відображає реальний робочий день School Manager.
 
-1. **Entry** — Manager відкриває дашборд зранку.
-2. **Overview** — KPI зверху: Active students, Risk count, тренд за тиждень.
-3. **Alert List** — топ 5–10 ризикових учнів, сортування high → medium, кожен рядок: ім'я + score + 1-рядок причини.
-4. **Student Details** (клік на учня) — профіль + timeline (графік логінів, ДЗ, повідомлень) + AI-пояснення.
-5. **AI Recommendation** — пропонована дія (5 варіантів playbook).
-6. **Draft Message** — готова чернетка від AI, редагована, кнопка Send.
-7. **Action** — повідомлення відправлено, видно статус (delivered / read / replied).
-8. **Feedback Loop** — учень відповів → ризик переоцінюється; якщо OK — виходить з alert list.
+1. **Вхід** — менеджер відкриває дашборд зранку.
+2. **Огляд** — KPI зверху: активні студенти, кількість ризикових, тренд за тиждень.
+3. **Список тривог** — топ 5–10 ризикових учнів, сортування high → medium, кожен рядок: ім'я + оцінка + 1-рядок причини.
+4. **Деталі студента** (клік на учня) — профіль + таймлайн (графік логінів, ДЗ, повідомлень) + AI-пояснення.
+5. **Рекомендація AI** — пропонована дія (5 варіантів з playbook).
+6. **Чернетка повідомлення** — готова чернетка від AI, редагована, кнопка Send.
+7. **Дія** — повідомлення відправлено, видно статус (delivered / read / replied).
+8. **Цикл зворотного зв'язку** — учень відповів → ризик переоцінюється; якщо OK — виходить зі списку тривог.
 
 Усе живе в одному дашборді, без переходу між системами.
 
@@ -354,8 +357,8 @@ login_events (
 | LLM | Claude (Sonnet 4.6+ або Opus 4.5+) через API | Особиста підписка Arsenii ($100/міс), вистачить лімітів |
 | Frontend | Next.js + Tailwind + shadcn + Tremor + Recharts | Швидко, сучасно, OSS |
 | Auth | Clerk (free tier 50k MRUs — [✓](#proof-clerk-pricing)) | Не писати з нуля |
-| Hosting | VPS Arsenii (для демо); production пізніше — Render / Railway | Дешево, контрольовано |
-| Email/Slack delivery (post-hackathon) | Resend / Slack Web API | Не пріоритет на демо |
+| Хостинг | VPS Arsenii (для демо); прод пізніше — Render / Railway | Дешево, контрольовано |
+| Доставка Email/Slack (пост-хакатон) | Resend / Slack Web API | Не пріоритет на демо |
 
 ### Конвенції з кореневого `CLAUDE.md` (обов'язково)
 - TypeScript strict, CommonJS (не ESM).
@@ -380,48 +383,48 @@ login_events (
 | **Еріка** | AI Content + Presentation | Tone-of-voice для агента-Комунікатора, шаблони повідомлень, презентація, відео-демо |
 | **Nadin** | Tech Lead / BA | Координація, ТЗ, польова експертиза EdTech (досвід ментора GoIT), підхват у Arsenii |
 
-## 9. Архітектура — Post-Hackathon Roadmap
+## 9. Архітектура — пост-хакатон-дорожня-карта
 
-> Усе нижче — **НЕ в хакатоні**. Це бачення, як еволюціонує продукт після demo. У презентації показуємо як план розвитку.
+> Усе нижче — **НЕ на хакатоні**. Це бачення, як еволюціонує продукт після демо. У презентації показуємо як план розвитку.
 
 ### 9.1 ML-шар як попередній фільтр
 
-Гібридна архітектура: класична ML-модель швидко скорить **усіх** учнів, multi-agent глибоко аналізує **тільки топ-ризикових** (наприклад, top-20% за score). Це дає:
+Гібридна архітектура: класична ML-модель швидко скорить **усіх** учнів, multi-agent глибоко аналізує **тільки топ-ризикових** (наприклад, топ-20% за оцінкою). Це дає:
 - **Економія 75–85% на витратах AI** (агенти бачать тільки 20% бази).
-- **Масштабованість до 10k+ учнів** без exploding cost.
-- **Маржа 70–80%** на рівні школи з 1000+ учнів.
-- **"Класичний" tier** для клієнтів, які бояться LLM-обробки (для шкіл з compliance-обмеженнями).
+- **Масштабованість до 10k+ учнів** без вибуху витрат.
+- **Маржа 70–80%** на рівні школи з 1000+ учнями.
+- **"Класичний" тариф** для клієнтів, які бояться LLM-обробки (для шкіл з compliance-обмеженнями).
 
 Стек ML-шару:
 - **XGBoost / LightGBM** ([↗](#glossary-xgboost)) — baseline на табличних фічах.
-- **SHAP feature attribution** ([↗](#glossary-shap)) — пояснення скорів, передається агенту-Аналітику як контекст.
+- **Атрибуція фічей через SHAP** ([↗](#glossary-shap)) — пояснення оцінок, передається агенту-Аналітику як контекст.
 - **Survival analysis (Cox / DeepSurv)** ([↗](#glossary-survival)) — для прогнозу "коли" дропне, не лише "чи".
-- **Uplift modeling** ([↗](#glossary-uplift)) для action layer — щоб цілитися у Persuadables, не у Sleeping Dogs (див. [§11.3](#113-чому-uplift-modeling--churn-prediction)).
+- **Uplift modeling** ([↗](#glossary-uplift)) для шару дії — щоб цілитися у Persuadables, не у Sleeping Dogs (див. [§11.3](#113-чому-uplift-modeling--churn-prediction)).
 
-### 9.2 Re-platforming agent orchestration (коли n8n впирається)
+### 9.2 Re-platforming оркестрації агентів (коли n8n впирається)
 
-n8n чудовий для хакатона і перших 5–10 клієнтів, але має задокументовані обмеження для production multi-agent ([n8n blog — Multi-agent systems](https://blog.n8n.io/multi-agent-systems/), [MindStudio — n8n vs agentic workflows](https://www.mindstudio.ai/blog/n8n-vs-agentic-workflows-when-to-use-each)) [⚠️ partial](#proof-n8n-limitations):
+n8n чудовий для хакатону і перших 5–10 клієнтів, але має задокументовані обмеження для production-режиму multi-agent ([n8n blog — Multi-agent systems](https://blog.n8n.io/multi-agent-systems/), [MindStudio — n8n vs agentic workflows](https://www.mindstudio.ai/blog/n8n-vs-agentic-workflows-when-to-use-each)) [⚠️ partial](#proof-n8n-limitations):
 
-- **Coordination overhead, quality drift, token explosion** — verbatim categories з n8n blog.
-- **Tool-calling failure modes** — failed tool calls можуть ламати workflow; security risks при додаванні tools.
-- **Complexity ceiling** — за [Anthropic engineering doc on multi-agent research systems](https://www.anthropic.com/engineering/multi-agent-research-system) (verbatim verified): **3–5 subagents in parallel** для швидкості; **3–10 tool calls per simple subagent**, 10–15 для direct comparisons, 10+ subagents для complex research. Перевищення → token explosion + coordination overhead. Tools-per-agent кількість Anthropic явно не нормує — це наш own design constraint при scale.
-- **n8n не проектувався для глибокого autonomous orchestration** — для 4 агентів і shallow handoffs OK, для 10+ агентів і circular reasoning потрібно re-platforming.
+- **Накладні витрати координації, дрейф якості, вибух токенів** — категорії verbatim з n8n blog.
+- **Збій виклику інструментів (tool-calling failure modes)** — невдалі виклики інструментів можуть ламати workflow; ризики безпеки при додаванні нових інструментів.
+- **Стеля складності** — за [Anthropic engineering doc on multi-agent research systems](https://www.anthropic.com/engineering/multi-agent-research-system) (verbatim verified): **3–5 субагентів паралельно** для швидкості; **3–10 викликів інструментів на простого субагента**, 10–15 для прямих порівнянь, 10+ субагентів для складних досліджень. Перевищення → вибух токенів + накладні витрати координації. Кількість інструментів на агента Anthropic явно не нормує — це наше власне дизайн-обмеження при масштабуванні.
+- **n8n не проєктувався для глибокої автономної оркестрації** — для 4 агентів і поверхневих handoffs OK, для 10+ агентів і circular reasoning потрібно re-platforming.
 
-**Trigger для re-platforming**: коли підключаємо 10-го клієнта **АБО** додаємо 5+ агента, мігруємо на code-based framework (LangGraph / CrewAI / custom Python). Цей перехід вже закладений у roadmap (§13, "ML-шар" фаза) — **не surprise risk**.
+**Тригер для re-platforming**: коли підключаємо 10-го клієнта **АБО** додаємо 5+ агента, мігруємо на code-based фреймворк (LangGraph / CrewAI / власний Python). Цей перехід уже закладений у дорожню карту (§13, фаза "ML-шар") — **не раптовий ризик**.
 
 ### 9.3 Реальні інтеграції
 
-- **LMS webhooks**: Thinkific, Teachable, Kajabi, Moodle, custom — кожна нова = 1–3 тижні роботи.
-- **Slack / Discord APIs** — для агента-Спостерігача в реальних чатах.
-- **Stripe / Recurly** — для signal "downgrade / failed payment".
+- **Webhook'и LMS**: Thinkific, Teachable, Kajabi, Moodle, власні — кожна нова = 1–3 тижні роботи.
+- **API Slack / Discord** — для агента-Спостерігача у реальних чатах.
+- **Stripe / Recurly** — для сигналу "downgrade / failed payment".
 - **Mailchimp / Resend** — для відправки агентом-Комунікатором.
 
-### 9.4 A/B testing engine
-RCT-розбивка з самого початку action layer: треба довести **uplift від інтервенцій**, не просто accuracy churn-моделі. Це і буде real product moat (див. [§11](#11-емпіричний-фундамент)). Прямий приклад в нашій галузі: [Sciencedirect — Uplift Modeling for preventing student dropout](https://www.sciencedirect.com/science/article/pii/S0167923620300750) — RCT-data + uplift-modelling показує, що persuadable-targeting знижує dropout сильніше за propensity-targeting.
+### 9.4 Engine для A/B-тестування
+RCT-розбивка з самого початку шару дії: треба довести **uplift від втручань**, не просто accuracy churn-моделі. Це і буде справжній moat продукту (див. [§11](#11-емпіричний-фундамент)). Прямий приклад у нашій галузі: [Sciencedirect — Uplift Modeling for preventing student dropout](https://www.sciencedirect.com/science/article/pii/S0167923620300750) — RCT-дані + uplift-modelling показує, що persuadable-targeting знижує дропаут сильніше за propensity-targeting.
 
-### 9.5 Modes продукту
+### 9.5 Формати продукту
 
-- **Окремий продукт** (SaaS, $300–500/міс підписка). Це попадає в "underserved middle" між безкоштовною Excel-таблицею ментора і enterprise-CSP типу Gainsight, який починається від $1000/міс і вище ([✓ verified](#proof-gainsight-pricing) — pricing непублічне; цифри з G2/Capterra). Default для хакатона.
+- **Окремий продукт** (SaaS, $300–500/міс підписка). Це потрапляє в "underserved middle" між безкоштовною Excel-таблицею ментора й enterprise-CSP-системами типу Gainsight, який починається від $1000/міс і вище ([✓ verified](#proof-gainsight-pricing) — прайсинг непублічний; цифри з G2/Capterra). За замовчуванням для хакатону.
 - **Модуль / API** для інтеграції в існуючі LMS-платформи (B2B2C через Thinkific/Teachable). Архітектурно одразу будуємо так, щоб обидва формати були можливі.
 - **Партнерство з платформами** під їхнім брендом (white-label).
 - **Пілот за сегментом** (тільки бізнес-курси, тільки bootcamps).
@@ -439,24 +442,33 @@ RCT-розбивка з самого початку action layer: треба д�
 | HTTPS-cert (Let's Encrypt / ZeroSSL) | $0 — auto-issuance через Caddy | — |
 | **Разом грошового видатку команди** | **~$10** (Claude API на час хакатона) | Arsenii |
 
-### 10.2 Софт (post-hackathon)
+### 10.2 Софт (пост-хакатон)
 
 - Чарт-бібліотеки (Recharts, Tremor, D3, Plotly OSS, ECharts): **$0**.
 - ML-стек (sklearn, XGBoost, SHAP, Lifelines, CausalML): **$0**.
 - Postgres, Redis (OSS), pgvector: **$0** (платиш за hosting).
 - n8n self-host: **$0** (Docker compose, OSS).
 
-### 10.3 Hosting (post-hackathon, оцінка)
+### 10.3 Хостинг (пост-хакатон, оцінка)
 
 - MVP з 3–5 пілотами (2–4 міс): **$200–500/міс**.
 - 10–30 платних клієнтів (5–9 міс): **$1000–3000/міс**.
 - Зрілий MVP (10–12 міс): **$5000–15000/міс** (з SOC 2 і юристом).
 
-### 10.4 LLM API (post-hackathon, основна стаття витрат)
+### 10.4 LLM API (пост-хакатон, основна стаття витрат)
 
 - Claude Sonnet **$3/M input, $15/M output** ([✓ verified](#proof-claude-pricing)). Реалістично на повноцінному multi-agent pipeline: **~$200–400/міс на середню школу 500 учнів**.
-- Гібрид з ML-шаром (агенти тільки на top-20%) — **~$40–80/міс на ту ж школу**.
-- На старті — first-party API. Self-hosted моделі (Llama / Qwen / Mistral через [vLLM](#glossary-vllm)) дешевші тільки при постійному навантаженні.
+- Гібрид з ML-шаром (агенти тільки на топ-20%) — **~$40–80/міс на ту ж школу**.
+- На старті — first-party API. Self-hosted-моделі (Llama / Qwen / Mistral через [vLLM](#glossary-vllm)) дешевші тільки при постійному навантаженні.
+
+### 10.5 Витрати на онбординг (одноразовий setup fee на школу)
+
+- **Приклади стилю + дескриптор тону** (§4.4): ~2-5 годин на школу.
+- **OAuth-інтеграція Slack/LMS** (пост-хакатон): ~1-3 години на школу для Thinkific/Teachable/Moodle (готові коннектори); 1-3 тижні для власної LMS (рідко).
+- **Початкова калібровка сигналів** (тренування Спостерігача на історичних даних школи): ~2-4 години.
+- **Загалом онбординг**: ~5-12 годин × $50/год внутрішньої вартості = **$250-600 витрат на школу**.
+- **Setup fee у моделі: $250-500 одноразово** на школу — конвертує витрати на працю у дохід, **виключає самостійний онбординг до фази масштабування у §13** (де амортизація дозволить self-serve UI).
+- На рівні 30 шкіл: 30 × $250 = $7,500 setup-доходу + ~150-360 годин праці (1-2 person-month) = окупає junior CS-інженера на пів-ставки. Це закладено у дорожню карту §13 між фазою активного пілоту і масштабуванням.
 
 ## 11. Емпіричний фундамент
 
@@ -470,24 +482,24 @@ RCT-розбивка з самого початку action layer: треба д�
 - **Online dropout vs offline: на 10–20% вищий, у деяких студіях — у 6–7 разів**. Концепт **Course Walls** — модулі, де студенти масово застрягають. — Christensen & Spackman 2017 [✓ verified](#proof-eric-online-vs-offline).
 - **Harvard/MIT MOOC, 2012: 22% completion** average — Ho, Reich et al. HarvardX/MITx report через Wikipedia [✓ verified](#proof-mooc-wiki).
 - **Висновки для нашого продукту**:
-  - Feature engineering ML-моделі (post-hackathon) має давати **перші 2 тижні × 3–5 більше ваги**.
+  - Feature engineering ML-моделі (пост-хакатон) має давати **перші 2 тижні × 3–5 більше ваги**.
   - **Course Walls** як окрема product-фіча: знаходити модулі, де когорта застрягає, повідомляти школу. Реалізовується агентом-Аналітиком.
 
 ### 11.2 Точність ML-моделей дропауту
 
-- **OULAD benchmark (наш dataset)**: 2024 systematic literature review ([Springer 2024](https://link.springer.com/chapter/10.1007/978-3-031-64315-6_46)) consolidує 17 articles (2017–2024). **Best-published XGBoost ceiling**: F1 ≈ 0.92, AUC ≈ 0.97 (cross-confirmed через незалежні web-summaries; вимагає extensive feature engineering / SMOTE oversampling). **Realistic typical XGBoost** без heavy preprocessing: F1 ≈ 0.85–0.91 (наприклад, окреме 2024 study повідомляє 92.4% accuracy / F1=0.91), AUC ≈ 0.85–0.95. [⚠️ partial](#proof-oulad-benchmark-2024) (ID/PRISMA verified; точний headline numbers за Springer paywall). **Реалістична post-hackathon ML-target**: F1 ≈ 0.85, AUC ≈ 0.90 — defensible проти журі, не "0.97 зі стелі".
-- **MAIC CPADP framework** ([arxiv 2508.17310](https://arxiv.org/abs/2508.17310)): fine-tuned PLM + MLP classifier на >3,000 students → **95.4% accuracy / F1 = 0.935**. GPT-4 few-shot baseline у тій же роботі — лише 77.9% / F1 = 0.604. **Висновок**: на тих самих даних ML-fine-tune перевершує pure-LLM на 17 п.п. accuracy → це підтверджує наш roadmap §9.1 (ML-as-prefilter, LLM-as-deep-analysis), а не pure-LLM-only архітектуру.
-- **AUC 87.33% production / 90.20% post-hoc** на 40 HarvardX MOOCs за 8 тижнів. Розрив 2.87 п.п. AUC між тестовим стендом і production-режимом. 5-layer NN значно кращий за logistic regression. — Whitehill et al. 2017 [✓ verified](#proof-whitehill-mooc-dropout).
+- **OULAD benchmark (наш датасет)**: 2024 systematic literature review ([Springer 2024](https://link.springer.com/chapter/10.1007/978-3-031-64315-6_46)) консолідує 17 статей (2017–2024). **Стеля найкращого опублікованого XGBoost**: F1 ≈ 0.92, AUC ≈ 0.97 (підтверджено через незалежні веб-резюме; вимагає важкого feature engineering / SMOTE oversampling). **Типовий XGBoost** без важкої передобробки: F1 ≈ 0.85–0.91 (наприклад, окреме дослідження 2024 повідомляє 92.4% accuracy / F1=0.91), AUC ≈ 0.85–0.95. [⚠️ partial](#proof-oulad-benchmark-2024) (ID/PRISMA verified; точні headline-цифри за Springer paywall). **Реалістична пост-хакатон ML-ціль**: F1 ≈ 0.85, AUC ≈ 0.90 — захищене проти журі, не "0.97 зі стелі".
+- **MAIC CPADP framework** ([arxiv 2508.17310](https://arxiv.org/abs/2508.17310)): дотренований PLM + MLP-класифікатор на >3,000 студентах → **95.4% accuracy / F1 = 0.935**. GPT-4 few-shot baseline у тій же роботі — лише 77.9% / F1 = 0.604. **Висновок**: на тих самих даних ML-дотренування перевершує pure-LLM на 17 п.п. accuracy → це підтверджує нашу дорожню карту §9.1 (ML як префільтр, LLM як глибокий аналіз), а не pure-LLM-only архітектуру.
+- **AUC 87.33% у проді / 90.20% post-hoc** на 40 HarvardX MOOCs за 8 тижнів. Розрив 2.87 п.п. AUC між тестовим стендом і прод-режимом. 5-шарова NN значно краща за logistic regression. — Whitehill et al. 2017 [✓ verified](#proof-whitehill-mooc-dropout).
 - **Стандартні метрики churn-моделі**: AUC + Top Decile Lift; подвійна мета — predictive performance + interpretability. — De Caigny et al. 2018 [✓ verified](#proof-customer-attrition-wiki).
-- **Moodle log-data CatBoost (2025)** [✓ verified](#proof-moodle-catboost-2025): [Nature Sci Reports 2025](https://www.nature.com/articles/s41598-025-93918-1) — CatBoost на student activity logs підтверджує tree-based gradient boosting як state-of-the-art для tabular dropout prediction. Reinforces наш ML-stack choice.
-- **Висновок**: реалістичний таргет **85–90% AUC / 0.85 F1** за достатнього обсягу даних (OULAD-grade quality); перші клієнти отримають нижчий performance до накопичення training data — мітигується heuristic baseline на старті. Best-case ceiling F1=0.92/AUC=0.97 — лише при extensive feature engineering + SMOTE.
+- **Moodle log-data CatBoost (2025)** [✓ verified](#proof-moodle-catboost-2025): [Nature Sci Reports 2025](https://www.nature.com/articles/s41598-025-93918-1) — CatBoost на логах активності студентів підтверджує tree-based gradient boosting як state-of-the-art для табличного прогнозу дропауту. Підкріплює наш ML-стек.
+- **Висновок**: реалістична ціль **85–90% AUC / 0.85 F1** за достатнього обсягу даних (рівня OULAD за якістю); перші клієнти отримають нижчий performance до накопичення тренувальних даних — пом'якшується евристичним baseline на старті. Стеля у найкращому випадку F1=0.92/AUC=0.97 — лише при важкому feature engineering + SMOTE.
 
 ### 11.3 Чому uplift-modeling ≠ churn-prediction
 
 - **4 сегменти юзерів** ([↗](#glossary-uplift)): Persuadables / Sure Things / Lost Causes / Sleeping Dogs. Тільки **Persuadables** дають incremental ROI. — Lo 2002, Radcliffe 2007, через Wikipedia [✓ verified](#proof-uplift-modeling-wiki).
 - **Sleeping Dogs ефект**: retention-кампанії документовано **підвищують** churn серед "сплячих" клієнтів у telco і financial services.
 - **Слідство**: traditional churn-prediction цілить у Sure Things (висока ймовірність churn ≠ висока ймовірність response). Uplift-модель — у Persuadables. Це різні objective functions.
-- **Висновок**: для post-hackathon action layer треба **uplift, не пропенсіті**.
+- **Висновок**: для пост-хакатон-шару-дії треба **uplift, не propensity**.
 
 ### 11.4 Контекст ринку
 
@@ -504,37 +516,63 @@ RCT-розбивка з самого початку action layer: треба д�
 |---|---|---|
 | **Direct prior art (MAIC, arxiv 2508.17310)** | LLM multi-agent + dropout intervention вже опубліковано Aug 2025 з 95.4% accuracy | MAIC = closed AI classroom з AI-Teacher; ми = **observation-mode над живими школами**. Журі може побачити MAIC у пошуку — на презентації **самі** проактивно цитуємо MAIC і пояснюємо різницю (§2.3 wedge) |
 | **Direct commercial competitor (EdSights, $5–$15/student)** | 250+ universities US ринок зайнятий | EdSights = SMS-chatbot, single-channel; ми = cross-channel observer. Ринковий segment EU/UA онлайн-шкіл відкритий — EdSights туди не локалізований |
-| Multi-agent ловить глюки і бага | n8n + Claude може давати unstable output, **n8n має задокументовані orchestration-обмеження** ([✓](#proof-n8n-limitations)) | Жорсткі structured outputs (JSON schema), evals на 4 demo-персонах перед finalізацією. Re-platforming у LangGraph/CrewAI заплановано на 10-го клієнта (§9.2) |
-| LLM hallucinations у Comunікатор-агенті | Будь-яка LLM може вигадати факти про учня | Завжди як **draft**; menедж натискає Send. Контекст агента — тільки реальні поля з БД, не свободна інтерпретація. Khanmigo cautionary tale ([⚠️ partial](#proof-khanmigo-modest)) — навіть Khan Academy показав лише **6.1pp improvement** на next-item correctness; самі автори визнають: "No single improvement on its own produced a dramatic leap forward" (Khan Academy blog, verbatim) |
-| Сильна презентація > слабкий код | Команда має 10 днів і денну роботу | Nadin: фокус на стабільне demo + сильна презентація, не на технічну глибину. Складні фічі (uplift, ML) — у roadmap, не в demo |
-| Дані half-real → демо неправдоподібне | Журі може помітити "штучність" сценаріїв | Поведінкова частина (homework deadlines, submission dates, grades, registration) — реальна з OULAD (32k студентів Open University); тільки чати + імена синтетичні. 4 типи персон (включно з false-positive resistance: SILENT BUT OK + FALSE ALARM) — з реальних `final_result` категорій. Повний transparent-mapping у [MAPPING.md](../data/oulad/MAPPING.md) для аудиту журі. |
-| Якість ML на малих/брудних даних (post-hackathon) | Production AUC ~3 п.п. нижчий за post-hoc | На хакатоні немає ML — це не ризик. Post-hackathon: heuristic baseline → ML тільки після ≥5–10 клієнтів × ≥6 міс даних |
-| Compliance (GDPR / FERPA / COPPA) | Юридична частина не вирішується інженерно | На хакатоні — OULAD (повністю анонімізований ARX-tool, CC BY 4.0, peer-reviewed Nature) + синтетичні чати. Нульовий compliance-ризик, коректна атрибуція в [MAPPING.md](../data/oulad/MAPPING.md). Юрист на ретейнер з 6-го місяця для real-LMS інтеграцій. |
-| SOC 2 Type II (post-hackathon, enterprise) | 6–12 міс процесу | Старт SOC 2 — 9–10 місяць roadmap |
+| Multi-agent ловить глюки і баги | n8n + Claude може давати нестабільний вихід, **n8n має задокументовані обмеження оркестрації** ([✓](#proof-n8n-limitations)) | Жорсткі structured outputs (JSON-схема), evals на 4 демо-персонах перед фіналізацією. Re-platforming у LangGraph/CrewAI заплановано на 10-го клієнта (§9.2) |
+| Галюцинації LLM у Комунікатор-агенті | Будь-яка LLM може вигадати факти про учня | Завжди як **чернетка (draft)**; менеджер натискає Send. Контекст агента — тільки реальні поля з БД, не вільна інтерпретація. Khanmigo cautionary tale ([⚠️ partial](#proof-khanmigo-modest)) — навіть Khan Academy показав лише **6.1 п.п. покращення** на next-item correctness; самі автори визнають: "No single improvement on its own produced a dramatic leap forward" (Khan Academy blog, verbatim) |
+| Сильна презентація > слабкий код | Команда має 10 днів і денну роботу | Nadin: фокус на стабільне демо + сильну презентацію, не на технічну глибину. Складні фічі (uplift, ML) — у дорожній карті, не в демо |
+| Напів-реальні дані → демо неправдоподібне | Журі може помітити "штучність" сценаріїв | Поведінкова частина (дедлайни ДЗ, дати подачі, оцінки, реєстрація) — реальна з OULAD (32k студентів Open University); тільки чати + імена синтетичні. 4 типи персон (включно зі стійкістю до false-positive: SILENT BUT OK + FALSE ALARM) — з реальних категорій `final_result`. Повний прозорий мапінг у [MAPPING.md](../data/oulad/MAPPING.md) для аудиту журі. |
+| **OULAD ↔ bootcamp — невідповідність патернів** | OULAD = дорослий part-time-університет, 38-тижневий семестр, соціальні науки. ICP = 12-тижневі інтенсивні bootcamps з когнітивним перевантаженням у перші 2-4 тижні. Сигнали Nadin (§6.3) — bootcamp-specific і **не валідовані на OU-когорті**. Журі з ML-бекграундом може спитати "як ваш sample транзитує на реальний ICP?" | Не приховувати: на слайді з даними **проактивно** позначити OULAD як **поведінковий субстрат**, не perfect proxy. У пілоті перенесення сигналів — гіпотеза, яку валідуємо, а не припущення. Опційно: розширити sample реальною мовою фрустрації з Reddit (r/learnprogramming тощо) — публічно, compliant, реальний bootcamp-вайб. |
+| **n=15 sample на 4 персони** (стійкість до false-positive робиться на n=1 FALSE_ALARM) | "Як довели стійкість до false-positive?" → "ну, 1 студент і ми його не флагнули" — слабка відповідь на ключовий wedge. | Розширити OULAD-sample до n=40-60 через додаткові модулі (BBB-2013J, CCC-2013J) — pipeline існує, ~3-4 години роботи. Альтернативно: зняти стійкість до false-positive з топ-wedges і перенести у дорожню карту. Поточний доступ: див. §13, задача P1. |
+| **Крихкість демо (4 послідовні виклики LLM + n8n + один VPS)** | 20-60 секунд затримки від кліку до чернетки; rate limits Anthropic API під час хакатону (всі команди б'ють одночасно); один VPS = одна точка відмови | **Попередньо записане демо-відео високої якості — головний артефакт**, live-демо тільки якщо все стабільно за 30 хв до сцени. Журі бачить 100 живих демо щороку — записане часто читається кращим product-сторі. Pre-cached відповіді LLM у Postgres для бекап-сценарію. |
+| **Витрати на tone-of-voice** | Перенесення стилю вимагає 5-10 прикладів реальних повідомлень школи + дескриптор тону — прихована вартість онбордингу ~2-5 годин на школу | На демо ми пишемо приклади самі. Для пілоту — це частина обміну на безкоштовний пілот (школа дає приклади як плату за участь). Самостійний tone-онбординг — у пост-хакатон-дорожній-карті (§13). Витрати на онбординг конвертуються у setup fee в unit economics (§10.3). |
+| Якість ML на малих/брудних даних (пост-хакатон) | AUC у проді ~3 п.п. нижчий за post-hoc | На хакатоні немає ML — це не ризик. Пост-хакатон: евристичний baseline → ML тільки після ≥5–10 клієнтів × ≥6 міс даних |
+| Compliance (GDPR / FERPA / COPPA) | Юридична частина не вирішується інженерно | На хакатоні — OULAD (повністю анонімізований через ARX-tool, CC BY 4.0, peer-reviewed Nature) + синтетичні чати. Нульовий compliance-ризик, коректна атрибуція в [MAPPING.md](../data/oulad/MAPPING.md). Юрист на ретейнер з 6-го місяця для інтеграцій з реальними LMS. |
+| SOC 2 Type II (пост-хакатон, enterprise) | 6–12 міс процесу | Старт SOC 2 — 9–10 місяць дорожньої карти |
 
-**Найризикованіше місце MVP**: довести uplift від інтервенцій RCT-тестом, а не просто accuracy моделі. На хакатоні цього не показуємо — у roadmap.
+**Найризикованіше місце MVP**: довести uplift від втручань через RCT, а не просто accuracy моделі. На хакатоні цього не показуємо — у дорожній карті.
 
-## 13. Roadmap
+## 13. Дорожня карта
+
+> **⚠️ Реалістичний таймлайн**: попередній план "пілот травень-червень → ML липень-вересень" — нереалістичний, бо (a) DPA для доступу до реальних Slack/LMS у EU/UA = 4-8 тижнів юридичної перевірки (GDPR, можливо DPIA), (b) ML-шар вимагає ≥6 міс розмічених даних на школу, яких на липень не буде ні з однієї школи. Перерахований таймлайн нижче — захищений перед інвестором.
 
 | Етап | Дати | Вихід |
 |---|---|---|
-| **Хакатон demo** | 9–18 травня 2026 | Multi-agent система + dashboard + 4 демо-персони + презентація + відео |
-| **Перші пілотні школи** | травень–червень 2026 | 1–2 школи (через знайомства Nadin у GoIT) тестують на реальних даних. **Pilot success criteria** (north-star метрики): (a) approval rate драфтів ≥75% — менеджер відправляє з мінорними правками, (b) median edit distance ≤30% — текст не переписується істотно, (c) time-to-send <5 хв на учня — швидше за писати з нуля, (d) intervention recall rate (% повернутих учнів серед flagged) ≥10% над baseline. **Якщо approval rate <60% або edit distance >50%** — Стратег/Комунікатор не дають value, треба переробляти playbook або tone-of-voice до scale-up. |
-| **ML-шар** | липень–вересень 2026 | XGBoost + SHAP як попередній фільтр перед агентами; гібридна архітектура |
-| **A/B testing engine + uplift** | жовтень–грудень 2026 | Доказ incremental retention на A/B тесті з 1 школою |
-| **Scale + диференціація** | 2027 Q1–Q2 | Marketplace listings (Thinkific/Teachable), self-serve onboarding, $20–50k MRR |
-| **Enterprise readiness** | 2027 Q3–Q4 | SSO, audit logs, multi-tenant guarantees, self-hosted LLM, перші enterprise-угоди ($1000+/міс) |
+| **Демо на хакатон** | 9–18 травня 2026 | Multi-agent система + дашборд + 4 демо-персони + презентація + **попередньо записане демо-відео як головний артефакт** (live-демо як fallback). |
+| **Розширення сампла (P1)** *(перед пілотом, можна після хакатону)* | травень-червень 2026 | OULAD-sample 15 → **40-60 студентів** через додаткові модулі (BBB-2013J / CCC-2013J — STEM, ближче за AAA до bootcamp-ICP). Опційно: розширити вміст чатів реальними Reddit-тредами (r/learnprogramming, r/cscareerquestions) для реальної мови фрустрації. Це закриває "n=1 false-alarm" дірку у §12. |
+| **Юридичні питання + DPA + інтеграції** | червень-серпень 2026 | Шаблон DPA українською (підготовлений з юристом), DPIA для GDPR-compliant-шкіл, OAuth-інтеграції для Slack + 1-2 LMS (Thinkific або Moodle). Реалістичний юридичний таймлайн — 4-8 тижнів. |
+| **Тіньовий пілот** (1 школа) | серпень-жовтень 2026 | 1 школа у **тіньовому режимі (shadow mode)**: система **збирає дані, генерує чернетки, але НЕ відправляє**. Менеджер бачить рекомендації + рейтить (approve/reject/edit). Це валідує сигнали і tone-of-voice **без ризику експозиції** для школи. Безкоштовний пілот в обмін на: (a) рандомізація 50/50 treatment/control, (b) право публікувати агреговані метрики, (c) статус reference-клієнта. |
+| **Активний пілот** (2-3 школи) | жовтень-грудень 2026 | Перехід на **активний режим (active mode)** після успіху тіньової валідації. **Критерії успіху пілоту** (north-star метрики, переноситься з попередньої чернетки §13): (a) % прийняття чернеток ≥75%, (b) медіана edit distance ≤30%, (c) час до надсилання <5 хв на учня, (d) recall втручань ≥10% над baseline. **Якщо % прийняття <60% або edit >50%** — STOP до масштабування, переробка playbook/тону. |
+| **Накопичення даних** | грудень 2026 - лютий 2027 | Накопичення ≥6 міс розмічених даних на школу (мінімум для чесного ML). Шар-2: початок розробки uplift-modeling pipeline на накопичених даних, **поки що без деплою**. |
+| **ML-шар + uplift на реальних даних** | березень-травень 2027 | XGBoost + SHAP як попередній фільтр перед агентами (§9.1 гібридна архітектура). Uplift-модель на реальних RCT-даних з тіньового+активного пілотів. **RCT-доказ** incremental retention vs контрольна група — наш ключовий артефакт defensibility (§2.3 RCT-data flywheel). |
+| **Масштабування + самостійний онбординг** | червень-серпень 2027 | Marketplace-лістинги (Thinkific/Teachable), самостійний tone-онбординг (закриває operational cost з §4.4 та §10.3), $20-50k MRR. |
+| **Enterprise-готовність** | 2027 Q4 - 2028 Q2 | SSO, аудит-логи, гарантії multi-tenant, self-hosted LLM-опція, SOC 2 Type II audit (6-12 міс процесу), перші enterprise-угоди ($1000+/міс). |
+
+### 13.1 Економічна модель пілоту
+
+- **Безкоштовний пілот для перших 2-3 шкіл** (не платний POC) — в обмін на:
+  - **Рандомізація RCT** 50/50 treatment/control (без цього incremental uplift не довести; не обговорюється).
+  - **Право на агреговану публікацію метрик** (whitepaper / case study).
+  - **Статус reference-клієнта** на 12 міс після пілоту.
+  - **Приклади стилю + дескриптор тону** для конфігурації tone-of-voice (~5-10 прикладів реальних повідомлень).
+- **Платні пілоти ($300-500/міс)** — лише з 4-5 школи, після того як тіньовий+активний режим на перших 2-3 валідували сигнали і залученість менеджера.
+- **Setup fee $250-500 одноразово** на школу — покриває 2-5 годин ручного налаштування стилю (див. §4.4 і §10.3). Конвертує onboarding cost у дохід.
+
+### 13.2 Чому таймлайн зсунутий проти попередньої версії
+
+- **DPA + DPIA** реально 4-8 тижнів. Це юридична робота, не інженерна.
+- **Тіньовий режим перед активним** — стандартна практика для продуктів з high-stakes-втручанням. Знижує ризик для школи (нічого не відправляється) і дає правдиву валідацію сигналів.
+- **ML-шар на реальних даних** замість моделі, тренованої на OULAD: модель, навчена на дорослих part-time-студентах OU, не транзитує на bootcamp-ICP (див. §3 OULAD caveat). Чесний ML-шар вимагає реальних розмічених даних на сегмент ICP.
+- **RCT-доказ uplift** — вимагає ≥3 міс спостереження на когорту × контрольна група; швидше неможливо без надмірних type-I errors.
 
 ## 14. Що НЕ робити (антипатерни)
 
-- Не додавати ML на хакатоні — навіть як baseline. Це з'їсть час і не дасть value на демо. ML — у roadmap.
+- Не додавати ML на хакатоні — навіть як baseline. Це з'їсть час і не дасть цінності на демо. ML — у дорожній карті.
 - Не вгадувати причини відтоку через LLM без даних. Агент-Аналітик має посилатися на конкретні факти з БД, не на здогадки.
-- Не починати з survival analysis або uplift modeling — це post-hackathon.
-- Не масштабувати інтеграції з LMS — на хакатоні дані half-real з OULAD; реальна real-time інтеграція з GoIT/Hillel/etc — після пілота.
+- Не починати з survival analysis або uplift modeling — це пост-хакатон.
+- Не масштабувати інтеграції з LMS — на хакатоні дані напів-реальні з OULAD; реальна real-time-інтеграція з GoIT/Hillel/etc — після пілоту.
 - Не писати своє BI з нуля — Tremor + Recharts вистачить.
-- Не додавати auth/rate-limiting/observability стек до бекенду без явного прохання — система навмисно мала.
+- Не додавати стек auth/rate-limiting/observability до бекенду без явного прохання — система навмисно мала.
 - Не плодити сервіси: Postgres-агрегації, не ClickHouse; pgvector у Postgres, не Pinecone — поки обсяги дозволяють.
-- Не відправляти повідомлення учням автоматично без human-in-the-loop. Завжди draft → Send manual.
+- Не відправляти повідомлення учням автоматично без людини-в-петлі (human-in-the-loop). Завжди чернетка → Send вручну.
 
 ## 15. Перевірені цифри (proofs)
 
@@ -722,7 +760,5 @@ node screenshot.js \
 
 ---
 
-**Дата створення документа**: 2026-05-09
-**Останнє оновлення**: 2026-05-10 (red-team round 2: §1.4 9.6% churn перефразовано як complementary signal, не "stronger-than-MOOC"; §1 dropout target **переанкорений на bracket EdSights +7% (floor) → tutoring 15–25% (ceiling), результат 7–15% з пілот-валідацією exact value** — прибрано back-of-envelope intensity-multiplier, обидва кінці bracket'а мають peer-reviewed citation; §2.3 додано wedge≠moat defensibility caveat з RCT-data flywheel як post-pilot moat; §4.0 додано **agent decomposition justification** — Спостерігач/Аналітик розділені по data-scope і token-budget, Стратег/Комунікатор по audit-ability; §4.1 Спостерігач переформульовано як **multi-source** input (primary = real OULAD homework+LMS, secondary = synthetic chats) для усунення circular-demo ризику; §13 pilot-row отримала explicit success criteria — approval rate ≥75%, edit distance ≤30%, time-to-send <5хв, intervention recall ≥10%. Попередній раунд: citation audit fixes — Nickow → AERJ 2024 0.29σ/89 studies; VanLehn step-based → 0.76σ; EdSights "100+ languages" видалено; EdSights "140+" → "250+" у §12; Anthropic "5–7 tools" → verifiable "3–5 subagents / 3–10 tool calls"; OULAD ceiling 0.92/0.97 + типове 0.85–0.91; Khanmigo "non-event" видалено; churn "11%→22% YoY" видалено)
 **Команда**: Arsenii (FE+BE+AI), Дмитро + Микола (AI agents + n8n), Олексій + Маргарита (data), Гюльзар (UX), Еріка (content+presentation), Nadin (tech lead + BA)
 **Дедлайн хакатона**: 18 травня 2026
