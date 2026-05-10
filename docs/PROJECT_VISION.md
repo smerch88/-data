@@ -22,7 +22,7 @@
 % зменшення [churn](#glossary-churn) або % збільшення [completion rate](#glossary-completion-rate). Все інше — proxy.
 
 ### Емпіричний baseline проблеми
-- **EdTech B2B SaaS — найвищий monthly churn серед усіх вертикалей: ~9.6%/міс** (industry benchmarks 2026, [Artisan Strategies](https://www.artisangrowthstrategies.com/blog/saas-churn-rate-benchmarks-2026-500-companies)) [✓ verified](#proof-edtech-saas-churn). Це **commercial signal сильніший за академічні MOOC-цифри** — проблема industry-wide, не anecdotal. За цим же бенчмарком, EdTech-monthly-churn **приблизно подвоївся з 2024 року** (verbatim: "a rate that has doubled since 2024").
+- **EdTech B2B SaaS — найвищий monthly churn серед усіх вертикалей: ~9.6%/міс** (industry benchmarks 2026, [Artisan Strategies](https://www.artisangrowthstrategies.com/blog/saas-churn-rate-benchmarks-2026-500-companies)) [✓ verified](#proof-edtech-saas-churn). Це **complementary commercial signal** до академічних MOOC-цифр: SaaS-вендори EdTech самі страждають від утримання → ринок retention-tooling доведений ринком, не лише академією. Метрика інша за студентський dropout (це vendor churn, не student dropout) — використовуємо як market-demand signal, цільову метрику продукту дають Jordan/ERIC нижче. За цим же бенчмарком, EdTech-monthly-churn **приблизно подвоївся з 2024 року** (verbatim: "a rate that has doubled since 2024").
 - **MOOC median completion rate: 12.6%** (Jordan 2015 IRRODL, 221 курсів) — [✓ verified](#proof-jordan-2015-irrodl). Newer revisit ([Open Praxis 2024](https://openpraxis.org/articles/10.55982/openpraxis.16.3.606)) підтверджує діапазон.
 - **Distance education dropout: 30–50%** (US літературний consensus; Європа 20–30%; Азія до 50%) — [✓ verified](#proof-eric-distance-ed).
 - **Online dropout vs offline: на 10–20% вищий, у деяких студіях — у 6–7 разів** (Christensen & Spackman 2017) — [✓ verified](#proof-eric-online-vs-offline).
@@ -35,7 +35,11 @@
 - **Bloom's 2-sigma problem (1984)** [✓ verified](#proof-bloom-2-sigma): історичний орієнтир (50-й → 98-й перцентиль) **сильно оспорений модерними реплікаціями**. Оригінальний 2σ-ефект частково зумовлений mastery-threshold дизайном (tutees мали 90% бар, control — без бару). Залишаємо як rhetorical anchor для проблеми "scalable 1:1", не як обіцянку ефекту.
 - **VanLehn 2011** [✓ verified](#proof-intelligent-tutoring-wiki): human tutors → **0.79σ**, step-based ITS → **0.76σ** (28 порівнянь), answer-based ITS → **0.31σ** (165 досліджень), substep-based ITS → 0.40σ. Тобто реальні step-based AI-tutors статистично близькі до експертів-людей, але не до Bloom-овського 2σ.
 - **Modern ITS meta-analysis (Kulik & Fletcher 2016)** [✓ verified](#proof-intelligent-tutoring-wiki): 50 контрольованих експериментів → median ES **0.66σ** (50-й → 75-й перцентиль), перемога у 92% порівнянь. **Caveat**: на локально розроблених тестах ES 0.73, на стандартизованих — лише **0.13**. K-12 контекст: K-12 math у Kulik & Fletcher показав ES 0.40 SD (0.10 на стандартизованих); Steenbergen-Hu & Cooper 2013 на тих же K-12 math студіях знайшли ~0 — тобто K-12 evidence **contested**, а не одностайно сильний.
-- **Реалістичний таргет нашого продукту**: **8–15% reduction in dropout у пілоті** (опущено з попередніх 10–18% після оновлення Nickow до 0.29σ). Підстава: ES 0.29–0.66σ (Nickow AERJ 2024 + Kulik 2016) × часткове експозування ефекту через message-draft (не повноцінний tutoring, ефективність ~30–50% від full intervention) + 30–50% baseline dropout (ERIC). Зважено-консервативний розрахунок: ~2–6 п.п. абсолютного зниження = 5–15% relative. **На презентації говоримо 8–12%, не 15–25%.**
+- **Реалістичний таргет нашого продукту**: **7–15% reduction in dropout у пілоті**, з валідацією точного значення на real data. Замість back-of-envelope multiplier'а використовуємо **bracket між двома найближчими аналогами** (обидва peer-reviewed):
+  - **Floor — chatbot baseline**: EdSights SMS-chatbot для at-risk students → **+7% avg retention** ([✓](#proof-edsights), 250+ US universities, **без human-in-the-loop**). Це мінімум "автоматизований outreach без особистого дотику" — нижче ми не маємо опуститися, бо додаємо менеджера, що особистіше за template-bot.
+  - **Ceiling — tutoring baseline**: full live tutoring (Nickow AERJ 2024 0.29σ + Kulik 2016 ITS 0.66σ) → ~15–25% reduction in dropout at maximum intensity. Це максимум "персистентний 1:1 контакт" — вище ми не дотягнемо, бо ми не tutoring (1 message + manager send ≠ 3 сесії/тиждень з персистентними відносинами).
+  - **Наша позиція**: chatbot-with-human-relay — особистіше за SMS-bot (manager-tailored draft, не template), слабше за live tutor (нижча intensity, лише outreach-trigger). Очікуємо **середню частину bracket'а**; пілот валідує exact value через approval rate × manager engagement × frequency-of-send (§13 metrics).
+  - **На презентації говоримо 7–15%, з honest caveat "exact value validated in pilot"**, а не точкову обіцянку. Це сильніше за "10-15% бо tutoring × multiplier" — обидва кінці bracket'а мають peer-reviewed citation, intermediate point — measurable hypothesis з explicit pilot test.
 
 ## 2. Диференціація проти конкурентів
 
@@ -68,6 +72,8 @@
 3. **Tone-of-voice agent (Комунікатор)**: draft message пишеться **в стилі конкретної школи** (configurable). EdSights → стандартний chatbot tone; MAIC → universal AI prompt; Civitas → workflow templates без AI-генерації тексту.
 4. **False-positive resistance by design**: 4-persona test set (HIGH/MEDIUM/SILENT-BUT-OK/FALSE-ALARM, §6.1) перетинається з реальними OULAD `final_result` категоріями. **Доводимо журі і клієнтам не лише "ловить ризик", а й "не флагує невинних"** — вимога, яку single-channel chatbot-и обходять стороною.
 5. **B2B segment "underserved middle"**: 100–5,000 students → надто малий для Civitas/Starfish (university scale), надто великий для Excel-ментора. EdSights в цьому сегменті ходить, але через US universities — **український/EU мід-сегмент онлайн-шкіл відкритий**.
+
+**Wedge ≠ moat (чесно про defensibility).** Усі 5 пунктів вище — позиціонування і execution-перевага, не технічний моат. Конкурент-клон з ресурсами може повторити cross-channel + tone-of-voice за 2–3 спринти. **Реальна defensibility будується пост-пілот:** (a) RCT-validated uplift на українському EdTech-сегменті як пропрієтарна training data для uplift-моделі, (b) глибина LMS/Slack-інтеграцій, де переключення дорожче за нашу підписку. Day one жодного з цих немає — це нормально для $300/міс ICP, не для enterprise. Журі і pilot-клієнтам говоримо це прямо: ми робимо ставку на **first-mover + RCT-data flywheel**, не на технологічний секрет.
 
 **Однорядковий pitch**: ми будуємо те, що Civitas Learning робить для університетів, **в B2B-форматі для онлайн-шкіл 100–5,000 учнів**, з **observation-mode multi-agent поверх живої Slack/LMS-економіки** замість запитів-через-chatbot.
 
@@ -115,6 +121,14 @@
 
 ## 4. Архітектура — Multi-agent (Hackathon)
 
+### 4.0 Чому 4 агенти (а не один великий промпт)
+
+Декомпозиція не довільна і не "архітектурний театр" — кожен агент відрізняється по **scope даних** і **token-budget**:
+
+- **Спостерігач + Аналітик мають різний обсяг входу.** Спостерігач сканує **7-денне вікно** по **всім** активним студентам школи (filter step, дешеві prompts, дублюється часто) → output: severity scores. Аналітик читає **30-денний крос-табличний контекст** (3 таблиці × 30 днів × full chat history) лише по **flagged students з severity ≥ 5** (deep step, дорогий prompt, рідкісний). Об'єднання їх в один промпт = або token explosion (30-day deep-context для всієї бази на кожному скані), або поверхневий аналіз (7 днів усім, чого не вистачає для діагнозу). Це **не два кути на ті самі дані** — це різні data-pipelines.
+- **Стратег + Комунікатор розділені по аудитованості.** Action-selection (policy) і message-generation (text) технічно можна злити в один промпт ("обери дію + напиши драфт"). Розділення дає: (a) аудит "чому саме ця дія" окремо від "як це сформульовано" — менеджер бачить rationale без впливу tone-формулювань, (b) A/B на rivane tone без зміни action policy, (c) можливість кешувати action і регенерувати тільки текст при зміні tone-of-voice.
+- **Чесно**: розділення Стратега і Комунікатора — defensible, але не критичне. Якщо token-cost буде проблемою у production, їх можна злити; розділення Спостерігача і Аналітика — критичне і не перемежовується.
+
 ```
                     ┌───────────────────────┐
                     │  Дашборд (Next.js)    │
@@ -154,16 +168,19 @@
 ```
 
 ### 4.1 Агент-Спостерігач
-- **Тригер**: scheduled (раз на день) або event-driven (новий Slack-message → webhook).
-- **Вхід**: Slack-повідомлення учня з останніх 7 днів (з трьох типів каналів: mentor_dm, group_chat, support_chat).
-- **Логіка**: prompt-classifier на Claude — шукає тривожні сигнали з 7-етапної послідовності (з власної експертизи Nadin як ментора GoIT, див. [§6.3](#63-сигнали-дропауту-польова-експертиза)):
-  1. ДЗ із запізненням
-  2. Пропустив 1–2 уроки з викладачем
-  3. Перестав ставити питання
-  4. Не здав ДЗ взагалі
-  5. Не заходив у LMS >7 днів
-  6. Негативні повідомлення ("складно", "кину", "не встигаю")
-  7. Не відповідає на ПП ментора
+- **Тригер**: scheduled (раз на день) або event-driven (новий LMS-event / Slack-message → webhook).
+- **Вхід**: **multi-source 7-денне вікно** по студенту:
+  - **Primary (real OULAD signals)**: homework records (deadlines, submissions, grades, статуси), LMS login/access events.
+  - **Secondary (синтетичні Slack-чати на хакатоні; real chats у пілоті)**: повідомлення з трьох типів каналів — mentor_dm, group_chat, support_chat.
+  - На демо це важливо: **первинні сигнали ризику походять з real OULAD-даних** (homework + LMS-events), чати додають контекст і фразеологію. Це нівелює ризик "circular demo на власноручно написаних чатах".
+- **Логіка**: prompt-classifier на Claude — шукає тривожні сигнали з 7-етапної послідовності (з власної експертизи Nadin як ментора GoIT, див. [§6.3](#63-сигнали-дропауту-польова-експертиза)). 4 з 7 сигналів — LMS/homework-based (real); 3 — chat-based (контекст):
+  1. ДЗ із запізненням *(homework, real)*
+  2. Пропустив 1–2 уроки з викладачем *(LMS events, real)*
+  3. Перестав ставити питання *(chat, контекст)*
+  4. Не здав ДЗ взагалі *(homework, real)*
+  5. Не заходив у LMS >7 днів *(LMS events, real)*
+  6. Негативні повідомлення ("складно", "кину", "не встигаю") *(chat, контекст)*
+  7. Не відповідає на ПП ментора *(chat, контекст)*
 - **Вихід**: список (student_id, signal_type, severity 0–10) → передається оркестратору.
 
 ### 4.2 Агент-Аналітик
@@ -502,7 +519,7 @@ RCT-розбивка з самого початку action layer: треба д�
 | Етап | Дати | Вихід |
 |---|---|---|
 | **Хакатон demo** | 9–18 травня 2026 | Multi-agent система + dashboard + 4 демо-персони + презентація + відео |
-| **Перші пілотні школи** | травень–червень 2026 | 1–2 школи (через знайомства Nadin у GoIT) тестують на реальних даних |
+| **Перші пілотні школи** | травень–червень 2026 | 1–2 школи (через знайомства Nadin у GoIT) тестують на реальних даних. **Pilot success criteria** (north-star метрики): (a) approval rate драфтів ≥75% — менеджер відправляє з мінорними правками, (b) median edit distance ≤30% — текст не переписується істотно, (c) time-to-send <5 хв на учня — швидше за писати з нуля, (d) intervention recall rate (% повернутих учнів серед flagged) ≥10% над baseline. **Якщо approval rate <60% або edit distance >50%** — Стратег/Комунікатор не дають value, треба переробляти playbook або tone-of-voice до scale-up. |
 | **ML-шар** | липень–вересень 2026 | XGBoost + SHAP як попередній фільтр перед агентами; гібридна архітектура |
 | **A/B testing engine + uplift** | жовтень–грудень 2026 | Доказ incremental retention на A/B тесті з 1 школою |
 | **Scale + диференціація** | 2027 Q1–Q2 | Marketplace listings (Thinkific/Teachable), self-serve onboarding, $20–50k MRR |
@@ -706,6 +723,6 @@ node screenshot.js \
 ---
 
 **Дата створення документа**: 2026-05-09
-**Останнє оновлення**: 2026-05-10 (citation audit fixes: Nickow → AERJ 2024 0.29σ/89 studies; VanLehn step-based → 0.76σ; EdSights "100+ languages" видалено; EdSights "140+" → "250+" у §12; Anthropic "5–7 tools" → verifiable "3–5 subagents / 3–10 tool calls"; OULAD ceiling 0.92/0.97 + типове 0.85–0.91; Khanmigo "non-event" видалено; churn "11%→22% YoY" видалено; recomputed dropout-target 8–15%)
+**Останнє оновлення**: 2026-05-10 (red-team round 2: §1.4 9.6% churn перефразовано як complementary signal, не "stronger-than-MOOC"; §1 dropout target **переанкорений на bracket EdSights +7% (floor) → tutoring 15–25% (ceiling), результат 7–15% з пілот-валідацією exact value** — прибрано back-of-envelope intensity-multiplier, обидва кінці bracket'а мають peer-reviewed citation; §2.3 додано wedge≠moat defensibility caveat з RCT-data flywheel як post-pilot moat; §4.0 додано **agent decomposition justification** — Спостерігач/Аналітик розділені по data-scope і token-budget, Стратег/Комунікатор по audit-ability; §4.1 Спостерігач переформульовано як **multi-source** input (primary = real OULAD homework+LMS, secondary = synthetic chats) для усунення circular-demo ризику; §13 pilot-row отримала explicit success criteria — approval rate ≥75%, edit distance ≤30%, time-to-send <5хв, intervention recall ≥10%. Попередній раунд: citation audit fixes — Nickow → AERJ 2024 0.29σ/89 studies; VanLehn step-based → 0.76σ; EdSights "100+ languages" видалено; EdSights "140+" → "250+" у §12; Anthropic "5–7 tools" → verifiable "3–5 subagents / 3–10 tool calls"; OULAD ceiling 0.92/0.97 + типове 0.85–0.91; Khanmigo "non-event" видалено; churn "11%→22% YoY" видалено)
 **Команда**: Arsenii (FE+BE+AI), Дмитро + Микола (AI agents + n8n), Олексій + Маргарита (data), Гюльзар (UX), Еріка (content+presentation), Nadin (tech lead + BA)
 **Дедлайн хакатона**: 18 травня 2026
