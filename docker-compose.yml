@@ -32,6 +32,10 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: "False"
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      # Stable SECRET_KEY survives container restarts → existing user cookies
+      # stay valid instead of triggering NoneType crashes in before_request.
+      # Value must be a Python string literal, hence the embedded single quotes.
+      PGADMIN_CONFIG_SECRET_KEY: "'${PGADMIN_SECRET_KEY:-dev-only-CHANGE-ME-on-prod-pgadmin-secret}'"
     ports:
       # On VPS bind 127.0.0.1 so only Caddy reverse-proxy reaches pgAdmin.
       - "${BIND_HOST:-0.0.0.0}:${PGADMIN_PORT:-5050}:80"
