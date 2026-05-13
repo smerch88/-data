@@ -296,9 +296,24 @@ function generateSlackMessages(student, assessments, persona) {
   return messages;
 }
 
+// Parse vle.csv (small, ~6.4K rows) → site dim rows for our target presentation.
+// Keeps full presentation catalogue (211 sites for AAA-2013J), not just sites
+// visited by our 15 students — so the dim table is complete and queries like
+// "which forums exist on this course" return the truth, not just our sample.
+function extractVleSites() {
+  const rows = parseCsv(path.join(DATA_DIR, 'vle.csv'))
+    .filter((r) => r.code_module === TARGET_MODULE && r.code_presentation === TARGET_PRESENTATION);
+  return rows.map((r) => ({
+    id_site: Number(r.id_site),
+    activity_type: r.activity_type,
+    week_from: r.week_from === '' ? null : Number(r.week_from),
+    week_to: r.week_to === '' ? null : Number(r.week_to),
+  }));
+}
+
 // Stream studentVle.csv (~10.6M rows, 433 MB) — filter to our target presentation
-// and sampled students, aggregate by (id_student, date offset). Returns the
-// rows shaped for the login_events table.
+// and sampled students, aggregate by (id_student, id_site, date offset). Returns
+// rows shaped for the login_events table (one row per student-site-day).
 //
 // OULAD CSV format is predictable: every field quoted, no escapes. We bypass
 // the generic parseCsvLine for ~5x speedup on this file.
@@ -307,7 +322,7 @@ async function extractLoginEvents(sampledIdSet) {
   const stream = fs.createReadStream(filePath, { encoding: 'utf8' });
   const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
 
-  // id_student → (offsetDay → totalClicks)
+  // id_student → id_site → offsetDay → totalClicks
   const agg = new Map();
   let isHeader = true;
   let rowsRead = 0;
@@ -325,22 +340,27 @@ async function extractLoginEvents(sampledIdSet) {
     if (!sampledIdSet.has(parts[2])) continue;
 
     rowsKept++;
-    let perDay = agg.get(parts[2]);
-    if (!perDay) { perDay = new Map(); agg.set(parts[2], perDay); }
+    let perSite = agg.get(parts[2]);
+    if (!perSite) { perSite = new Map(); agg.set(parts[2], perSite); }
+    let perDay = perSite.get(parts[3]);
+    if (!perDay) { perDay = new Map(); perSite.set(parts[3], perDay); }
     perDay.set(parts[4], (perDay.get(parts[4]) || 0) + Number(parts[5]));
   }
 
   console.error(`[sample] studentVle.csv: scanned ${rowsRead.toLocaleString()} rows, kept ${rowsKept.toLocaleString()} for our cohort`);
 
   const events = [];
-  for (const [idStudent, perDay] of agg) {
+  for (const [idStudent, perSite] of agg) {
     const studentId = `stud_${String(idStudent).padStart(6, '0')}`;
-    for (const [dayOffset, sumClicks] of perDay) {
-      events.push({
-        student_id: studentId,
-        occurred_on: dateFromOffset(dayOffset).toISOString().slice(0, 10),
-        sum_clicks: sumClicks,
-      });
+    for (const [idSite, perDay] of perSite) {
+      for (const [dayOffset, sumClicks] of perDay) {
+        events.push({
+          student_id: studentId,
+          id_site: Number(idSite),
+          occurred_on: dateFromOffset(dayOffset).toISOString().slice(0, 10),
+          sum_clicks: sumClicks,
+        });
+      }
     }
   }
   return events;
@@ -492,6 +512,9 @@ async function main() {
     ourMessages.push(...generateSlackMessages({ id: studentId }, [], persona));
   });
 
+  console.error('[sample] parsing vle.csv for vle_sites dim ...');
+  const ourVleSites = extractVleSites();
+
   console.error('[sample] streaming studentVle.csv for login_events ...');
   const ourLoginEvents = await extractLoginEvents(sampledIdSet);
 
@@ -510,13 +533,14 @@ async function main() {
     students: ourStudents,
     homework: ourHomework,
     slack_messages: ourMessages,
+    vle_sites: ourVleSites,
     login_events: ourLoginEvents,
   };
 
   const outPath = path.join(DATA_DIR, 'sample.json');
   fs.writeFileSync(outPath, JSON.stringify(out, null, 2), 'utf8');
   console.error(`[sample] saved → ${outPath}`);
-  console.error(`[sample] courses=${out.courses.length}, mentors=${out.mentors.length}, students=${out.students.length}, homework=${out.homework.length}, messages=${out.slack_messages.length}, login_events=${out.login_events.length}`);
+  console.error(`[sample] courses=${out.courses.length}, mentors=${out.mentors.length}, students=${out.students.length}, homework=${out.homework.length}, messages=${out.slack_messages.length}, vle_sites=${out.vle_sites.length}, login_events=${out.login_events.length}`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

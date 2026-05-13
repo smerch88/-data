@@ -44,8 +44,16 @@ interface SampledStudent {
 
 interface SampledLoginEvent {
   student_id: string;
+  id_site: number;
   occurred_on: string;
   sum_clicks: number;
+}
+
+interface SampledVleSite {
+  id_site: number;
+  activity_type: string;
+  week_from: number | null;
+  week_to: number | null;
 }
 
 interface SampledHomework {
@@ -76,6 +84,7 @@ interface Sample {
   students: SampledStudent[];
   homework: SampledHomework[];
   slack_messages: SampledMessage[];
+  vle_sites: SampledVleSite[];
   login_events: SampledLoginEvent[];
 }
 
@@ -93,8 +102,10 @@ function loadSample(): Sample {
 export async function seed(knex: Knex): Promise<void> {
   const sample = loadSample();
 
-  // Clear in dependency order
+  // Clear in dependency order (children → parents).
+  // login_events FKs both students (CASCADE) and vle_sites (RESTRICT) — must die first.
   await knex('login_events').del();
+  await knex('vle_sites').del();
   await knex('slack_messages').del();
   await knex('homework').del();
   await knex('students').del();
@@ -104,6 +115,7 @@ export async function seed(knex: Knex): Promise<void> {
   // Insert in dependency order
   await knex('mentors').insert(sample.mentors);
   await knex('courses').insert(sample.courses);
+  await knex.batchInsert('vle_sites', sample.vle_sites, 100);
 
   const studentRows = sample.students.map((s) => ({
     id: s.id,
@@ -129,6 +141,7 @@ export async function seed(knex: Knex): Promise<void> {
       `${sample.students.length} students, ` +
       `${sample.homework.length} homework, ` +
       `${sample.slack_messages.length} messages, ` +
+      `${sample.vle_sites.length} vle sites, ` +
       `${sample.login_events.length} login events`
   );
 }
