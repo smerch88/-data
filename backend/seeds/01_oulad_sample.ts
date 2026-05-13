@@ -30,6 +30,7 @@ interface SampledStudent {
   id: string;
   name: string;
   email: string;
+  slack_id: string;
   course_id: string;
   mentor_id: string;
   enrollment_date: string;
@@ -39,6 +40,12 @@ interface SampledStudent {
   _persona?: string;
   _oulad_id?: string;
   _final_result?: string;
+}
+
+interface SampledLoginEvent {
+  student_id: string;
+  occurred_on: string;
+  sum_clicks: number;
 }
 
 interface SampledHomework {
@@ -69,6 +76,7 @@ interface Sample {
   students: SampledStudent[];
   homework: SampledHomework[];
   slack_messages: SampledMessage[];
+  login_events: SampledLoginEvent[];
 }
 
 function loadSample(): Sample {
@@ -86,6 +94,7 @@ export async function seed(knex: Knex): Promise<void> {
   const sample = loadSample();
 
   // Clear in dependency order
+  await knex('login_events').del();
   await knex('slack_messages').del();
   await knex('homework').del();
   await knex('students').del();
@@ -100,6 +109,7 @@ export async function seed(knex: Knex): Promise<void> {
     id: s.id,
     name: s.name,
     email: s.email,
+    slack_id: s.slack_id,
     course_id: s.course_id,
     mentor_id: s.mentor_id,
     enrollment_date: s.enrollment_date,
@@ -109,6 +119,7 @@ export async function seed(knex: Knex): Promise<void> {
   await knex.batchInsert('students', studentRows, 50);
   await knex.batchInsert('homework', sample.homework, 100);
   await knex.batchInsert('slack_messages', sample.slack_messages, 100);
+  await knex.batchInsert('login_events', sample.login_events, 500);
 
   // eslint-disable-next-line no-console
   console.log(
@@ -117,6 +128,7 @@ export async function seed(knex: Knex): Promise<void> {
       `${sample.courses.length} courses, ` +
       `${sample.students.length} students, ` +
       `${sample.homework.length} homework, ` +
-      `${sample.slack_messages.length} messages`
+      `${sample.slack_messages.length} messages, ` +
+      `${sample.login_events.length} login events`
   );
 }

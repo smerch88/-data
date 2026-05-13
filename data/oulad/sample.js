@@ -24,6 +24,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 
 const DATA_DIR = __dirname;
 const TARGET_MODULE = 'AAA';
@@ -295,7 +296,57 @@ function generateSlackMessages(student, assessments, persona) {
   return messages;
 }
 
-function main() {
+// Stream studentVle.csv (~10.6M rows, 433 MB) — filter to our target presentation
+// and sampled students, aggregate by (id_student, date offset). Returns the
+// rows shaped for the login_events table.
+//
+// OULAD CSV format is predictable: every field quoted, no escapes. We bypass
+// the generic parseCsvLine for ~5x speedup on this file.
+async function extractLoginEvents(sampledIdSet) {
+  const filePath = path.join(DATA_DIR, 'studentVle.csv');
+  const stream = fs.createReadStream(filePath, { encoding: 'utf8' });
+  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+
+  // id_student → (offsetDay → totalClicks)
+  const agg = new Map();
+  let isHeader = true;
+  let rowsRead = 0;
+  let rowsKept = 0;
+
+  for await (const line of rl) {
+    if (isHeader) { isHeader = false; continue; }
+    if (!line) continue;
+    rowsRead++;
+
+    // "AAA","2013J","28400","546652","-10","4" → ["AAA","2013J","28400","546652","-10","4"]
+    const parts = line.slice(1, -1).split('","');
+    if (parts[0] !== TARGET_MODULE) continue;
+    if (parts[1] !== TARGET_PRESENTATION) continue;
+    if (!sampledIdSet.has(parts[2])) continue;
+
+    rowsKept++;
+    let perDay = agg.get(parts[2]);
+    if (!perDay) { perDay = new Map(); agg.set(parts[2], perDay); }
+    perDay.set(parts[4], (perDay.get(parts[4]) || 0) + Number(parts[5]));
+  }
+
+  console.error(`[sample] studentVle.csv: scanned ${rowsRead.toLocaleString()} rows, kept ${rowsKept.toLocaleString()} for our cohort`);
+
+  const events = [];
+  for (const [idStudent, perDay] of agg) {
+    const studentId = `stud_${String(idStudent).padStart(6, '0')}`;
+    for (const [dayOffset, sumClicks] of perDay) {
+      events.push({
+        student_id: studentId,
+        occurred_on: dateFromOffset(dayOffset).toISOString().slice(0, 10),
+        sum_clicks: sumClicks,
+      });
+    }
+  }
+  return events;
+}
+
+async function main() {
   console.error('[sample] reading OULAD CSVs ...');
   const courses = parseCsv(path.join(DATA_DIR, 'courses.csv'))
     .filter((c) => c.code_module === TARGET_MODULE && c.code_presentation === TARGET_PRESENTATION);
@@ -391,6 +442,7 @@ function main() {
       id: studentId,
       name,
       email: fakeEmail(s.id_student, name),
+      slack_id: `U${String(s.id_student).padStart(6, '0')}`,
       course_id: ourCourses[0].id,
       mentor_id: mentor.id,
       enrollment_date: enrollmentDate.toISOString().slice(0, 10),
@@ -440,6 +492,9 @@ function main() {
     ourMessages.push(...generateSlackMessages({ id: studentId }, [], persona));
   });
 
+  console.error('[sample] streaming studentVle.csv for login_events ...');
+  const ourLoginEvents = await extractLoginEvents(sampledIdSet);
+
   const out = {
     _meta: {
       source: 'OULAD (Kuzilek, Hlosta, Zdrahal 2017, figshare DOI 10.6084/m9.figshare.5081998)',
@@ -455,12 +510,13 @@ function main() {
     students: ourStudents,
     homework: ourHomework,
     slack_messages: ourMessages,
+    login_events: ourLoginEvents,
   };
 
   const outPath = path.join(DATA_DIR, 'sample.json');
   fs.writeFileSync(outPath, JSON.stringify(out, null, 2), 'utf8');
   console.error(`[sample] saved → ${outPath}`);
-  console.error(`[sample] courses=${out.courses.length}, mentors=${out.mentors.length}, students=${out.students.length}, homework=${out.homework.length}, messages=${out.slack_messages.length}`);
+  console.error(`[sample] courses=${out.courses.length}, mentors=${out.mentors.length}, students=${out.students.length}, homework=${out.homework.length}, messages=${out.slack_messages.length}, login_events=${out.login_events.length}`);
 }
 
-main();
+main().catch((e) => { console.error(e); process.exit(1); });
