@@ -14,6 +14,8 @@ function metricsQuery() {
     .leftJoin('student_late_homework_count as l', 's.id', 'l.student_id')
     .leftJoin('student_avg_grade as g', 's.id', 'g.student_id')
     .leftJoin('student_submission_timing_shift as t', 's.id', 't.student_id')
+    .leftJoin('student_last_message_stats as lm', 's.id', 'lm.student_id')
+    .leftJoin('student_wrote_to_mentor as wm', 's.id', 'wm.student_id')
     .select(
       's.id as student_id',
       's.name',
@@ -25,7 +27,10 @@ function metricsQuery() {
       'g.avg_grade',
       't.early_avg_delay',
       't.late_avg_delay',
-      't.submission_timing_shift'
+      't.submission_timing_shift',
+      'lm.last_message_date',
+      'lm.last_message_days_ago',
+      'wm.wrote_to_mentor'
     );
 }
 
@@ -47,7 +52,10 @@ function metricsQuery() {
  *         early_avg_delay: { type: number, nullable: true, description: "Avg delay (days) over first half of submissions" }
  *         late_avg_delay: { type: number, nullable: true, description: "Avg delay (days) over second half of submissions" }
  *         submission_timing_shift: { type: number, nullable: true, description: "late_avg_delay - early_avg_delay; positive = student is sliding into lateness" }
- *       required: [student_id, name, missed_homework_count, late_homework_count]
+ *         last_message_date: { type: string, format: date-time, nullable: true, description: "MAX(sent_at) over slack messages where is_from_student=true" }
+ *         last_message_days_ago: { type: integer, nullable: true, description: "Days between today and last_message_date; NULL if student never wrote" }
+ *         wrote_to_mentor: { type: boolean, description: "Did the student ever send a message with mentioned_mentor=true" }
+ *       required: [student_id, name, missed_homework_count, late_homework_count, wrote_to_mentor]
  */
 
 /**
