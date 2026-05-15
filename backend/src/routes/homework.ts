@@ -6,6 +6,7 @@ import {
   BadRequestError,
   pickString,
   pickInt,
+  pickDate,
   countTotal,
 } from '../lib/pagination';
 
@@ -32,6 +33,14 @@ const router = Router();
  *       - in: query
  *         name: module
  *         schema: { type: integer }
+ *       - in: query
+ *         name: from
+ *         description: Deadline lower bound (inclusive, YYYY-MM-DD).
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: to
+ *         description: Deadline upper bound (exclusive, YYYY-MM-DD).
+ *         schema: { type: string, format: date }
  *     responses:
  *       200:
  *         description: Paginated list ordered by deadline
@@ -52,12 +61,16 @@ router.get('/', async (req, res, next) => {
     const hwId = pickString(req, 'hw_id');
     const status = pickString(req, 'status');
     const module = pickInt(req, 'module');
+    const from = pickDate(req, 'from');
+    const to = pickDate(req, 'to');
 
     const q = db('homework');
     if (studentId) q.where({ student_id: studentId });
     if (hwId) q.where({ hw_id: hwId });
     if (status) q.where({ status });
     if (module !== undefined) q.where({ module });
+    if (from) q.where('deadline', '>=', from);
+    if (to) q.where('deadline', '<', to);
 
     const total = await countTotal(q);
     const items = await q

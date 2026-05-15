@@ -175,6 +175,14 @@ router.get('/:id', async (req, res, next) => {
  *       - in: query
  *         name: status
  *         schema: { type: string, enum: [missed, late, submitted, graded] }
+ *       - in: query
+ *         name: from
+ *         description: Deadline lower bound (inclusive, YYYY-MM-DD).
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: to
+ *         description: Deadline upper bound (exclusive, YYYY-MM-DD).
+ *         schema: { type: string, format: date }
  *     responses:
  *       200:
  *         description: Homework rows ordered by deadline
@@ -195,8 +203,12 @@ router.get('/:id/homework', async (req, res, next) => {
     if (!exists) throw new NotFoundError('student', req.params.id);
 
     const status = pickString(req, 'status');
+    const from = pickDate(req, 'from');
+    const to = pickDate(req, 'to');
     const q = db('homework').where({ student_id: req.params.id });
     if (status) q.where({ status });
+    if (from) q.where('deadline', '>=', from);
+    if (to) q.where('deadline', '<', to);
     const rows = await q.orderBy('deadline', 'asc');
     res.json(rows);
   } catch (e) {
