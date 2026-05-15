@@ -170,6 +170,7 @@ const spec = swaggerJsdoc({
       { name: 'slack-messages', description: 'Slack chat history' },
       { name: 'vle-sites', description: 'VLE (LMS) site dimension' },
       { name: 'login-events', description: 'Daily per-site click counts' },
+      { name: 'metrics', description: 'Per-student key calculations (joined from 4 VIEWs)' },
     ],
   },
   apis: [path.join(__dirname, 'routes/*.{ts,js}')],

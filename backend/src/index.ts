@@ -10,6 +10,7 @@ import homeworkRouter from './routes/homework';
 import slackMessagesRouter from './routes/slack-messages';
 import vleSitesRouter from './routes/vle-sites';
 import loginEventsRouter from './routes/login-events';
+import metricsRouter from './routes/metrics';
 import { mountSwagger } from './swagger';
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/homework', homeworkRouter);
 app.use('/slack-messages', slackMessagesRouter);
 app.use('/vle-sites', vleSitesRouter);
 app.use('/login-events', loginEventsRouter);
+app.use('/metrics', metricsRouter);
 
 app.get('/', (_req, res) => {
   res.json({
