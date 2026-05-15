@@ -17,6 +17,15 @@
 import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
+  // Drop any pre-existing versions of these views first. CREATE OR REPLACE
+  // cannot change a column's data type, so if a legacy version exists with
+  // different types (e.g. an `interval` column from an earlier hand-written
+  // SQL), we must drop and recreate. CASCADE in case anything depends on it.
+  await knex.raw(`DROP VIEW IF EXISTS student_avg_grade CASCADE`);
+  await knex.raw(`DROP VIEW IF EXISTS student_submission_timing_shift CASCADE`);
+  await knex.raw(`DROP VIEW IF EXISTS student_late_homework_count CASCADE`);
+  await knex.raw(`DROP VIEW IF EXISTS student_missed_homework_count CASCADE`);
+
   // 1. missed_homework_count
   await knex.raw(`
     CREATE OR REPLACE VIEW student_missed_homework_count AS
