@@ -1,0 +1,91 @@
+id,student_id,hw_id,module,title,topic,deadline,submitted_at,status,grade
+1,stud_134143,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-03 00:00:00+00,graded,87
+2,stud_134143,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-10 00:00:00+00,graded,83
+3,stud_134143,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-15 00:00:00+00,graded,85
+4,stud_134143,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-23 00:00:00+00,graded,86
+5,stud_134143,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,2026-05-01 00:00:00+00,graded,81
+6,stud_134143,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,2026-05-08 00:00:00+00,graded,90
+7,stud_011391,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-03 00:00:00+00,graded,78
+8,stud_011391,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-10 00:00:00+00,graded,85
+9,stud_011391,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-16 00:00:00+00,graded,80
+10,stud_011391,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-23 00:00:00+00,graded,85
+11,stud_011391,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,2026-05-01 00:00:00+00,graded,82
+12,stud_011391,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,2026-05-07 00:00:00+00,graded,76
+13,stud_116692,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-03 00:00:00+00,graded,72
+14,stud_116692,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-10 00:00:00+00,graded,77
+15,stud_116692,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-15 00:00:00+00,graded,72
+16,stud_116692,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-23 00:00:00+00,graded,78
+17,stud_116692,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,2026-05-01 00:00:00+00,graded,72
+18,stud_116692,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,2026-05-08 00:00:00+00,graded,71
+19,stud_228222,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-03 00:00:00+00,graded,71
+20,stud_228222,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-10 00:00:00+00,graded,45
+21,stud_228222,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-15 00:00:00+00,graded,67
+22,stud_228222,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-23 00:00:00+00,graded,66
+23,stud_228222,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,2026-05-01 00:00:00+00,graded,60
+24,stud_228222,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,2026-05-08 00:00:00+00,graded,55
+25,stud_306466,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-03 00:00:00+00,graded,81
+26,stud_306466,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-10 00:00:00+00,graded,78
+27,stud_306466,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-15 00:00:00+00,graded,88
+28,stud_306466,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-23 00:00:00+00,graded,76
+29,stud_306466,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,2026-05-01 00:00:00+00,graded,87
+30,stud_306466,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,2026-05-08 00:00:00+00,graded,88
+31,stud_386952,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-03 00:00:00+00,graded,67
+32,stud_386952,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-10 00:00:00+00,graded,63
+33,stud_386952,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-15 00:00:00+00,graded,71
+34,stud_386952,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-23 00:00:00+00,graded,64
+35,stud_386952,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,2026-05-01 00:00:00+00,graded,75
+36,stud_386952,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,2026-05-08 00:00:00+00,graded,73
+37,stud_978739,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-03 00:00:00+00,graded,59
+38,stud_978739,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-10 00:00:00+00,graded,58
+39,stud_978739,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-17 00:00:00+00,graded,50
+40,stud_978739,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-28 00:00:00+00,graded,58
+41,stud_978739,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,2026-05-01 00:00:00+00,graded,58
+42,stud_978739,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,2026-05-12 00:00:00+00,graded,51
+43,stud_2171627,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-03 00:00:00+00,graded,71
+44,stud_2171627,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-10 00:00:00+00,graded,67
+45,stud_2171627,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-15 00:00:00+00,graded,72
+46,stud_2171627,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-23 00:00:00+00,graded,70
+47,stud_2171627,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,2026-05-01 00:00:00+00,graded,65
+48,stud_2171627,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,2026-05-08 00:00:00+00,graded,69
+49,stud_2551220,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-02 00:00:00+00,graded,77
+50,stud_2551220,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-13 00:00:00+00,graded,54
+51,stud_2551220,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-20 00:00:00+00,graded,67
+52,stud_2551220,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,NULL,missed,NULL
+53,stud_2551220,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,NULL,missed,NULL
+54,stud_2551220,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,NULL,missed,NULL
+55,stud_074372,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-02 00:00:00+00,graded,60
+56,stud_074372,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-13 00:00:00+00,submitted,18
+57,stud_074372,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-17 00:00:00+00,graded,67
+58,stud_074372,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-29 00:00:00+00,graded,49
+59,stud_074372,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,NULL,missed,NULL
+60,stud_074372,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,NULL,missed,NULL
+61,stud_341872,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-03 00:00:00+00,graded,64
+62,stud_341872,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-10 00:00:00+00,graded,64
+63,stud_341872,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-19 00:00:00+00,graded,63
+64,stud_341872,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-26 00:00:00+00,graded,70
+65,stud_341872,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,2026-05-05 00:00:00+00,graded,60
+66,stud_341872,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,2026-05-10 00:00:00+00,graded,45
+67,stud_1472925,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-03 00:00:00+00,graded,61
+68,stud_1472925,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-10 00:00:00+00,graded,54
+69,stud_1472925,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-15 00:00:00+00,graded,64
+70,stud_1472925,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-23 00:00:00+00,graded,62
+71,stud_1472925,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,2026-05-01 00:00:00+00,graded,67
+72,stud_1472925,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,2026-05-08 00:00:00+00,graded,65
+73,stud_030268,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,NULL,missed,NULL
+74,stud_030268,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,NULL,missed,NULL
+75,stud_030268,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,NULL,missed,NULL
+76,stud_030268,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,NULL,missed,NULL
+77,stud_030268,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,NULL,missed,NULL
+78,stud_030268,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,NULL,missed,NULL
+79,stud_292923,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-05 00:00:00+00,graded,43
+80,stud_292923,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-13 00:00:00+00,graded,51
+81,stud_292923,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-17 00:00:00+00,graded,46
+82,stud_292923,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-29 00:00:00+00,graded,41
+83,stud_292923,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,NULL,missed,NULL
+84,stud_292923,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,NULL,missed,NULL
+85,stud_1763015,hw_1752,1,TMA #1752,Tutor-Marked Assignment,04/04/2026,2026-04-03 00:00:00+00,graded,68
+86,stud_1763015,hw_1753,2,TMA #1753,Tutor-Marked Assignment,04/11/2026,2026-04-10 00:00:00+00,graded,50
+87,stud_1763015,hw_1754,4,TMA #1754,Tutor-Marked Assignment,04/18/2026,2026-04-19 00:00:00+00,graded,41
+88,stud_1763015,hw_1755,6,TMA #1755,Tutor-Marked Assignment,04/25/2026,2026-04-26 00:00:00+00,graded,55
+89,stud_1763015,hw_1756,8,TMA #1756,Tutor-Marked Assignment,05/02/2026,NULL,missed,NULL
+90,stud_1763015,hw_1757,9,Exam #1757,Final Exam TMA1,05/09/2026,2026-05-10 00:00:00+00,submitted,31
