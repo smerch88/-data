@@ -1,8 +1,68 @@
 import { Router } from 'express';
 import { db } from '../db';
-import { NotFoundError } from '../lib/pagination';
+import { NotFoundError, BadRequestError, pickString, pickInt, pickDate } from '../lib/pagination';
 
 const router = Router();
+
+/**
+ * Parse the engagement classification params shared by both list + detail
+ * engagement endpoints. Defaults match Dmytro's spec (14/60 day thresholds).
+ * `as_of` defaults to CURRENT_DATE — pass an explicit date to anchor the
+ * formula at a fixed point in the seeded simulation timeline.
+ */
+function parseEngagementParams(req: import('express').Request): {
+  asOf: string;
+  activeDays: number;
+  pausedDays: number;
+} {
+  const asOf = pickDate(req, 'as_of') ?? new Date().toISOString().slice(0, 10);
+  const activeDays = pickInt(req, 'active_days') ?? 14;
+  const pausedDays = pickInt(req, 'paused_days') ?? 60;
+  if (activeDays < 1) throw new BadRequestError('active_days must be >= 1');
+  if (pausedDays <= activeDays) throw new BadRequestError('paused_days must be > active_days');
+  return { asOf, activeDays, pausedDays };
+}
+
+/**
+ * Compute engagement classification SQL inline. Filters login_events to rows
+ * occurring on or before `as_of` so days_since_login is always non-negative
+ * (i.e. "as of this date, what's the last login we know about?"). Students
+ * with no qualifying login events get NULL last_login_on + 'inactive' status.
+ */
+function engagementQuery(asOf: string, activeDays: number, pausedDays: number) {
+  return db('students as s')
+    .leftJoin(
+      db('login_events')
+        .select('student_id')
+        .max('occurred_on as last_login_on')
+        .where('occurred_on', '<=', asOf)
+        .groupBy('student_id')
+        .as('le'),
+      's.id',
+      'le.student_id'
+    )
+    .select(
+      's.id as student_id',
+      's.name',
+      's.status as student_status',
+      'le.last_login_on',
+      db.raw(
+        `CASE WHEN le.last_login_on IS NULL THEN NULL
+              ELSE (?::date - le.last_login_on)::int
+         END AS days_since_login`,
+        [asOf]
+      ),
+      db.raw(
+        `CASE
+           WHEN le.last_login_on IS NULL THEN 'inactive'
+           WHEN (?::date - le.last_login_on) <= ? THEN 'active'
+           WHEN (?::date - le.last_login_on) <= ? THEN 'paused'
+           ELSE 'inactive'
+         END AS engagement_status`,
+        [asOf, activeDays, asOf, pausedDays]
+      )
+    );
+}
 
 /**
  * Joined query used by both list and detail endpoints. Joins students against
@@ -82,6 +142,127 @@ router.get('/', async (_req, res, next) => {
   try {
     const rows = await metricsQuery().orderBy('s.name', 'asc');
     res.json(rows);
+  } catch (e) {
+    next(e);
+  }
+});
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     StudentEngagement:
+ *       type: object
+ *       properties:
+ *         student_id: { type: string }
+ *         name: { type: string }
+ *         student_status: { type: string, enum: [active, paused, dropped, completed], description: "Admin/outcome status from students table; independent of engagement_status" }
+ *         last_login_on: { type: string, format: date, nullable: true, description: "MAX(occurred_on) over login_events filtered to <= as_of" }
+ *         days_since_login: { type: integer, nullable: true, description: "as_of - last_login_on in whole days; NULL if no logins" }
+ *         engagement_status: { type: string, enum: [active, paused, inactive], description: "Per Dmytro's rule: days <= active_days -> active; <= paused_days -> paused; otherwise inactive (incl. no logins)" }
+ *       required: [student_id, name, engagement_status]
+ *
+ * /metrics/engagement:
+ *   get:
+ *     summary: Per-student engagement classification (formula-based, dynamic)
+ *     description: |
+ *       Computes `engagement_status` per student from `login_events` using a
+ *       threshold formula:
+ *
+ *       - `days_since_login <= active_days` → `active`
+ *       - `days_since_login <= paused_days` → `paused`
+ *       - otherwise (incl. no logins on or before `as_of`) → `inactive`
+ *
+ *       Useful for anchoring the rule at a specific simulation date (the
+ *       seeded login_events run 2026-03 to 2026-12, so `as_of` defaults to
+ *       today which may give all-`active` if you're mid-window; pick a date
+ *       like `2026-12-30` to see the classification distribute across
+ *       active/paused/inactive).
+ *     tags: [metrics]
+ *     parameters:
+ *       - in: query
+ *         name: as_of
+ *         description: Reference date (YYYY-MM-DD). Defaults to CURRENT_DATE.
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: active_days
+ *         description: Upper bound (inclusive) for `active`. Default 14.
+ *         schema: { type: integer, minimum: 1, default: 14 }
+ *       - in: query
+ *         name: paused_days
+ *         description: Upper bound (inclusive) for `paused`. Must be > active_days. Default 60.
+ *         schema: { type: integer, minimum: 2, default: 60 }
+ *       - in: query
+ *         name: student_id
+ *         description: Optional filter — return only this student.
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: One row per student
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/StudentEngagement' }
+ *       400:
+ *         description: Invalid params
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ */
+router.get('/engagement', async (req, res, next) => {
+  try {
+    const { asOf, activeDays, pausedDays } = parseEngagementParams(req);
+    const studentId = pickString(req, 'student_id');
+    const q = engagementQuery(asOf, activeDays, pausedDays);
+    if (studentId) q.where('s.id', studentId);
+    const rows = await q.orderByRaw('days_since_login NULLS LAST').orderBy('s.id', 'asc');
+    res.json(rows);
+  } catch (e) {
+    next(e);
+  }
+});
+
+/**
+ * @openapi
+ * /metrics/engagement/{student_id}:
+ *   get:
+ *     summary: Engagement classification for one student
+ *     tags: [metrics]
+ *     parameters:
+ *       - in: path
+ *         name: student_id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: as_of
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: active_days
+ *         schema: { type: integer, minimum: 1, default: 14 }
+ *       - in: query
+ *         name: paused_days
+ *         schema: { type: integer, minimum: 2, default: 60 }
+ *     responses:
+ *       200:
+ *         description: Engagement row
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/StudentEngagement' }
+ *       404:
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ */
+router.get('/engagement/:student_id', async (req, res, next) => {
+  try {
+    const { asOf, activeDays, pausedDays } = parseEngagementParams(req);
+    const row = await engagementQuery(asOf, activeDays, pausedDays)
+      .where('s.id', req.params.student_id)
+      .first();
+    if (!row) throw new NotFoundError('student', req.params.student_id);
+    res.json(row);
   } catch (e) {
     next(e);
   }
