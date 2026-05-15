@@ -156,8 +156,9 @@ const spec = swaggerJsdoc({
         '(students, courses, mentors, homework, slack messages, VLE sites, login events).',
     },
     servers: [
-      { url: 'http://localhost:3000', description: 'Local dev' },
-      { url: 'http://213.199.49.241:3000', description: 'VPS' },
+      { url: '/', description: 'Same origin (recommended — use whichever host you loaded /docs from)' },
+      { url: 'http://localhost:3000', description: 'Local dev (direct)' },
+      { url: 'http://213.199.49.241:8080', description: 'VPS (direct)' },
     ],
     components,
     tags: [

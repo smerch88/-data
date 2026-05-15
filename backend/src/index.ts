@@ -1,4 +1,5 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
+import cors from 'cors';
 import { env } from './env';
 import { db } from './db';
 import healthRouter from './routes/health';
@@ -12,6 +13,7 @@ import loginEventsRouter from './routes/login-events';
 import { mountSwagger } from './swagger';
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 mountSwagger(app);
