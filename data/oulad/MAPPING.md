@@ -73,8 +73,9 @@ slack_messages   id, student_id, channel_type, is_from_student, message_text,
   - 8 `Pass` → **PASS** (включно з тими, що мало пишуть = SILENT_BUT_OK)
   - 3 `Fail` → **MEDIUM_RISK**
   - 3 `Withdrawn` → **HIGH_RISK**
-- **Anchor дата**: `2026-04-01` (OULAD містить тільки day-offsets від presentation start, ми трактуємо їх як "днів від 1 квітня 2026"). Це робить демо часово актуальним, а не 2013-м.
-- **Курс перейменовано**: `AAA 2013J` → `"Algebra Foundations (Spring 2026)"` — щоб назва читалась людиною на демо.
+- **Anchor дата**: `2013-10-07` — фактичний старт OULAD AAA-2013J (presentation "J" = жовтень). OULAD CSV містить тільки day-offsets від presentation start, ми трактуємо їх як "днів від 7 жовтня 2013". Анкор лишаємо в минулому, щоб жодна похідна дата (deadlines, submissions, logins, slack messages) не була в майбутньому відносно поточного часу демо.
+- **Slack-меседжі anchor**: `PRESENTATION_START + 220 днів` (~17 травня 2014) — синтетичні повідомлення лягають у вікно мід-курсу, а не "30 днів від `Date.now()`" як було раніше.
+- **Курс перейменовано**: `AAA 2013J` → `"Algebra Foundations (Autumn 2013)"` — щоб назва читалась людиною на демо і не суперечила датам.
 
 ## Прямий мапінг (поле → поле)
 
@@ -83,7 +84,7 @@ slack_messages   id, student_id, channel_type, is_from_student, message_text,
 | Наше поле | OULAD-джерело | Коментар |
 |---|---|---|
 | `id` | `code_module + "_" + code_presentation` (lowercase) | `aaa_2013j` |
-| `name` | (синтетично) | "Algebra Foundations (Spring 2026)" |
+| `name` | (синтетично) | "Algebra Foundations (Autumn 2013)" |
 | `total_modules` | `assessments.count() WHERE code_module=AAA AND code_presentation=2013J` | 6 (тривіальна агрегація) |
 | `duration_weeks` | `courses.module_presentation_length / 7` | 38 (з 268 днів) |
 | `format` | (синтетично) | завжди `'self_paced'` для OULAD-даних |
@@ -97,7 +98,7 @@ slack_messages   id, student_id, channel_type, is_from_student, message_text,
 | `email` | (синтетично) | трансліт `name` + `id_student@example.school` |
 | `course_id` | константа `aaa_2013j` | усі студенти в одному курсі для демо |
 | `mentor_id` | round-robin серед 3 інвентованих менторів | OULAD не має tutor-FK |
-| `enrollment_date` | `studentRegistration.date_registration` (offset → ISO date) | від'ємні offset → до anchor 2026-04-01 |
+| `enrollment_date` | `studentRegistration.date_registration` (offset → ISO date) | від'ємні offset → до anchor 2013-10-07 |
 | `current_module` | (евристично) | 2 для HIGH_RISK / 4 для MEDIUM / 6 для completed |
 | `status` | `studentInfo.final_result` mapped: | див. таблицю нижче |
 

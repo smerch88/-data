@@ -36,10 +36,15 @@ const SAMPLE_BY_OUTCOME = {
   Withdrawn: 3, // HIGH RISK
 };
 // Course presentation start date — anchor for synthesizing real timestamps.
-// AAA 2013J means October 2013 presentation. We use a recent fictional anchor
-// for the demo so dates feel current.
-const PRESENTATION_START = new Date('2026-04-01T00:00:00Z');
+// AAA 2013J means October 2013 presentation. Anchored to the actual OULAD
+// start so all derived timestamps (homework deadlines, submissions, logins,
+// slack messages) land entirely in the past — no future-dated rows.
+const PRESENTATION_START = new Date('2013-10-07T00:00:00Z');
 const DAY_MS = 24 * 60 * 60 * 1000;
+// Anchor synthetic Slack messages inside the course timeframe (mid-to-late
+// presentation, around day 220 of the 268-day window = ~May 2014). Without
+// this they'd be relative to Date.now() and break the "no future dates" rule.
+const SLACK_ANCHOR_MS = PRESENTATION_START.getTime() + 220 * 24 * 60 * 60 * 1000;
 
 function parseCsv(filePath) {
   const text = fs.readFileSync(filePath, 'utf8');
@@ -220,9 +225,9 @@ function pickMessage(bank, key, idStudent, salt) {
 function generateSlackMessages(student, assessments, persona) {
   const messages = [];
   const bank = MESSAGE_BANK[persona] || MESSAGE_BANK.PASS;
-  // Anchor message dates around assessment cut-off dates and "now".
-  const now = Date.now();
-  const recent30Start = now - 30 * DAY_MS;
+  // Anchor message dates inside the OULAD presentation window (see
+  // SLACK_ANCHOR_MS) so nothing lands in the future relative to today.
+  const recent30Start = SLACK_ANCHOR_MS - 30 * DAY_MS;
 
   // Helper: emit a message at a specific timestamp.
   function emit(channel, fromStudent, text, ts) {
@@ -413,7 +418,7 @@ async function main() {
   const ourCourses = [
     {
       id: `${TARGET_MODULE.toLowerCase()}_${TARGET_PRESENTATION.toLowerCase()}`,
-      name: 'Algebra Foundations (Spring 2026)',
+      name: 'Algebra Foundations (Autumn 2013)',
       total_modules: Math.max(1, allAssessments.length),
       duration_weeks: Math.round(Number(courses[0].module_presentation_length) / 7),
       format: 'self_paced',

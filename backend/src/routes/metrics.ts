@@ -174,9 +174,9 @@ router.get('/', async (_req, res, next) => {
  *       - otherwise (incl. no logins on or before `as_of`) → `inactive`
  *
  *       Useful for anchoring the rule at a specific simulation date (the
- *       seeded login_events run 2026-03 to 2026-12, so `as_of` defaults to
- *       today which may give all-`active` if you're mid-window; pick a date
- *       like `2026-12-30` to see the classification distribute across
+ *       seeded login_events run 2013-09 to 2014-07 — OULAD AAA-2013J window —
+ *       so today's `as_of` will mark every student `inactive`; pick a date
+ *       like `2014-05-01` to see the classification distribute across
  *       active/paused/inactive).
  *     tags: [metrics]
  *     parameters:
