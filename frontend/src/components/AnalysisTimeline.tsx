@@ -51,6 +51,37 @@ export function AnalysisTimeline({
   if (!start || !end) return null;
   const asOfPct = ratioInRange(asOf, start, end) * 100;
 
+  // Vertical stagger ONLY for dots whose horizontal projections actually
+  // collide (< OVERLAP_PCT of the axis apart). Isolated runs sit flat on
+  // the line; a colliding group is spread symmetrically around it so each
+  // stays individually hoverable / clickable / deletable.
+  const OVERLAP_PCT = 2;
+  const STACK_STEP = 16; // px; ≥ dot diameter (size-3.5 = 14px)
+  const dyById = new Map<number, number>();
+  {
+    const ordered = runs
+      .map((r) => ({ id: r.id, left: ratioInRange(r.asOfDate, start, end) * 100 }))
+      .sort((a, b) => a.left - b.left || a.id - b.id);
+    let cluster: typeof ordered = [];
+    const flush = () => {
+      const n = cluster.length;
+      cluster.forEach((c, k) => {
+        dyById.set(c.id, n === 1 ? 0 : (k - (n - 1) / 2) * STACK_STEP);
+      });
+      cluster = [];
+    };
+    for (const item of ordered) {
+      const prev = cluster[cluster.length - 1];
+      if (!prev || item.left - prev.left < OVERLAP_PCT) {
+        cluster.push(item);
+      } else {
+        flush();
+        cluster.push(item);
+      }
+    }
+    flush();
+  }
+
   return (
     <Card>
       <div className="px-8 pt-6 pb-12">
@@ -117,12 +148,11 @@ export function AnalysisTimeline({
             </div>
           )}
 
-          {runs.map((r, i) => {
+          {runs.map((r) => {
             const left = ratioInRange(r.asOfDate, start, end) * 100;
             const selected = r.id === selectedRunId;
             const clickable = r.status === 'complete';
-            // small vertical stagger so same-day re-runs don't fully overlap
-            const dy = (i % 2 === 0 ? -1 : 1) * (i % 3) * 6;
+            const dy = dyById.get(r.id) ?? 0;
             return (
               <div
                 key={r.id}

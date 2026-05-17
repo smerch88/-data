@@ -105,7 +105,43 @@
             {
               "id": "502c9dfb-c499-4bb5-b1fb-8520761d984c",
               "name": "mentor_summary",
-              "value": "\"Студент в нормі\"",
+              "value": "\"Сигналів недостатньо для глибокого аналізу — студент у нормі станом на цю дату.\"",
+              "type": "string"
+            },
+            {
+              "id": "fix4-urgency",
+              "name": "urgency",
+              "value": "\"monitor\"",
+              "type": "string"
+            },
+            {
+              "id": "fix4-student_state",
+              "name": "student_state",
+              "value": "\"on_track\"",
+              "type": "string"
+            },
+            {
+              "id": "fix4-priority",
+              "name": "priority",
+              "value": "\"low\"",
+              "type": "string"
+            },
+            {
+              "id": "fix4-primary_drivers",
+              "name": "primary_drivers",
+              "value": "={{ [] }}",
+              "type": "array"
+            },
+            {
+              "id": "fix4-supporting_evidence",
+              "name": "supporting_evidence",
+              "value": "={{ [] }}",
+              "type": "array"
+            },
+            {
+              "id": "fix4-dashboard_label",
+              "name": "dashboard_label",
+              "value": "\"✅ OK\"",
               "type": "string"
             }
           ]
@@ -231,7 +267,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\n\n// Очищення зайвих лапок\nfunction c(val) {\n  if (val === null || val === undefined) return val;\n  if (typeof val !== 'string') return val;\n  return val.replace(/^\"(.*)\"$/s, '$1');\n}\n\nreturn [{\n  json: {\n    // Ідентифікація\n    student_id:   input.student_id,\n    student_name: input.student?.name      || input.student_name,\n    slack_id:     input.student?.slack_id  || input.slack_id,\n    course:       input.student?.course    || input.course,\n    mentor_id:    input.student?.mentor_id || input.mentor_id,\n\n    // Сигнали\n    signals: {\n      last_login_days_ago:     input.computed_signals?.last_login_days_ago     || 0,\n      missed_homework_count:   input.computed_signals?.missed_homework_count   || 0,\n      late_homework_count:     input.computed_signals?.late_homework_count     || 0,\n      submission_timing_shift: input.computed_signals?.submission_timing_shift || false,\n      last_message_days_ago:   input.computed_signals?.last_message_days_ago   || 0,\n      wrote_to_mentor:         input.computed_signals?.wrote_to_mentor         || false,\n      activity_drop:           input.computed_signals?.activity_drop           || false,\n    },\n\n    // Observer\n    observer: {\n      signals:                     input.observer_result?.signals                     || [],\n      max_severity:                input.observer_result?.max_severity                || 0,\n      sentiment:                   input.observer_result?.sentiment                   || 'neutral',\n      has_explicit_dropout_intent: input.observer_result?.has_explicit_dropout_intent || false,\n    },\n\n    // Analyst — очищаємо лапки\n    risk_score:               Number(c(String(input.risk_score || '0'))) || 0,\n    risk_level:               c(input.risk_level)               || 'low',\n    urgency:                  c(input.urgency)                   || 'monitor',\n    student_state:            c(input.student_state)             || 'on_track',\n    active_stages:            input.active_stages                || [],\n    days_to_dropout_estimate: c(input.days_to_dropout_estimate)  || null,\n    red_zone:                 input.red_zone                     || false,\n    score_breakdown:          input.score_breakdown              || {},\n    primary_drivers:          input.primary_drivers              || [],\n    supporting_evidence:      input.supporting_evidence          || [],\n\n    // Strategy — очищаємо лапки\n    recommended_action:        c(input.recommended_action)        || 'no_action',\n    secondary_action:          c(input.secondary_action)          || null,\n    priority:                  c(input.priority)                  || 'low',\n    timing:                    c(input.timing)                    || 'monitor',\n    expected_lift_qualitative: c(input.expected_lift_qualitative) || 'low',\n    rationale:                 c(input.rationale)                 || '',\n\n    // Communicator — очищаємо лапки\n    draft_message:   c(input.draft_message)   || '',\n    mentor_summary:  c(input.mentor_summary)  || '',\n    dashboard_label: c(input.dashboard_label) || '✅ OK',\n\n    // HW Summary\n    hw_summary: input.hw_summary || {},\n\n    // Службові\n    status:      'pending_review',\n    trigger:     input.trigger || 'manual',\n    analyzed_at: new Date().toISOString(),\n  }\n}];"
+        "jsCode": "const input = $input.first().json;\n\n// Очищення зайвих лапок\nfunction c(val) {\n  if (val === null || val === undefined) return val;\n  if (typeof val !== 'string') return val;\n  return val.replace(/^\"(.*)\"$/s, '$1');\n}\n\nconst out = {\n  // Ідентифікація\n  student_id:   input.student_id,\n  student_name: input.student?.name      || input.student_name,\n  slack_id:     input.student?.slack_id  || input.slack_id,\n  course:       input.student?.course    || input.course,\n  mentor_id:    input.student?.mentor_id || input.mentor_id,\n\n  // Сигнали\n  signals: {\n    last_login_days_ago:     input.computed_signals?.last_login_days_ago     ?? null,\n    missed_homework_count:   input.computed_signals?.missed_homework_count   || 0,\n    late_homework_count:     input.computed_signals?.late_homework_count     || 0,\n    submission_timing_shift: input.computed_signals?.submission_timing_shift || false,\n    last_message_days_ago:   input.computed_signals?.last_message_days_ago   ?? null,\n    wrote_to_mentor:         input.computed_signals?.wrote_to_mentor         || false,\n    activity_drop:           input.computed_signals?.activity_drop           || false,\n  },\n\n  // Observer\n  observer: {\n    signals:                     input.observer_result?.signals                     || [],\n    max_severity:                input.observer_result?.max_severity                || 0,\n    sentiment:                   input.observer_result?.sentiment                   || 'neutral',\n    has_explicit_dropout_intent: input.observer_result?.has_explicit_dropout_intent || false,\n  },\n\n  // Analyst\n  risk_score:               Number(c(String(input.risk_score || '0'))) || 0,\n  risk_level:               c(input.risk_level)               || 'low',\n  urgency:                  c(input.urgency)                   || 'monitor',\n  student_state:            c(input.student_state)             || 'on_track',\n  active_stages:            input.active_stages                || [],\n  days_to_dropout_estimate: c(input.days_to_dropout_estimate)  || null,\n  red_zone:                 input.red_zone                     || false,\n  score_breakdown:          input.score_breakdown              || {},\n  primary_drivers:          input.primary_drivers              || [],\n  supporting_evidence:      input.supporting_evidence          || [],\n\n  // Strategy\n  recommended_action:        c(input.recommended_action)        || 'no_action',\n  secondary_action:          c(input.secondary_action)          || null,\n  priority:                  c(input.priority)                  || 'low',\n  timing:                    c(input.timing)                    || 'monitor',\n  expected_lift_qualitative: c(input.expected_lift_qualitative) || 'low',\n  rationale:                 c(input.rationale)                 || '',\n\n  // Communicator\n  draft_message:   c(input.draft_message)   || '',\n  mentor_summary:  c(input.mentor_summary)  || '',\n  dashboard_label: c(input.dashboard_label) || '✅ OK',\n\n  // HW Summary\n  hw_summary: input.hw_summary || {},\n\n  // Службові\n  status:      'pending_review',\n  trigger:     input.trigger || 'manual',\n  analyzed_at: new Date().toISOString(),\n};\n\n// ── Fix 4: emit ONE internally-coherent record ────────────────\nconst lvlRank = { low: 0, medium: 1, high: 2 };\nconst urgRank = { monitor: 0, this_week: 1, immediate: 2 };\nconst maxLvl  = (a, b) => (lvlRank[b] > lvlRank[a] ? b : a);\nconst maxUrg  = (a, b) => (urgRank[b] > urgRank[a] ? b : a);\nconst scored  = Number(out.risk_score) || 0;\n\nif (scored <= 0) {\n  // No actionable deep analysis (severity gate skip / No Action / score 0)\n  // -> a single clean \"OK\" record. No leftover this_week/struggling mush.\n  out.risk_score               = 0;\n  out.risk_level               = 'low';\n  out.urgency                  = 'monitor';\n  out.student_state            = 'on_track';\n  out.priority                 = 'low';\n  out.recommended_action       = 'no_action';\n  out.secondary_action         = null;\n  out.timing                   = 'monitor';\n  out.primary_drivers          = [];\n  out.supporting_evidence      = [];\n  out.days_to_dropout_estimate = null;\n  out.red_zone                 = false;\n  out.draft_message            = '';\n  out.mentor_summary           = 'Сигналів недостатньо для глибокого аналізу — студент у нормі станом на цю дату.';\n  out.dashboard_label          = '✅ OK';\n} else {\n  // Deep analysis ran -> forbid contradictory pairs / band under-statement.\n  if (out.student_state === 'disengaged') {\n    out.risk_level = maxLvl(out.risk_level, 'medium');\n    out.urgency    = maxUrg(out.urgency, 'this_week');\n  }\n  if (scored >= 70)      out.risk_level = 'high';\n  else if (scored >= 40) out.risk_level = maxLvl(out.risk_level, 'medium');\n}\n\nreturn [{ json: out }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
