@@ -128,7 +128,12 @@ export function ScanButton({
   }
 
   const busy = phase === 'starting' || phase === 'running' || phase === 'stalled';
-  const progress = state ? (state.freshCount ?? state.analyzedCount) : 0;
+  // Clamp to [0, total]: defends the UI if analysis_results ever carries
+  // residue (the historical NULL-row "17/15" class of bug) or during a
+  // mid-run row churn — progress must never read >total or negative.
+  const progress = state
+    ? Math.min(Math.max(0, state.freshCount ?? state.analyzedCount), state.totalStudents)
+    : 0;
 
   return (
     <div className="flex flex-col items-end gap-1">

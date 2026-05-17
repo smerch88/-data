@@ -198,7 +198,9 @@ export default function Dashboard() {
             <span>
               Студентів:{' '}
               <b className="text-ink">
-                {data ? `${data.scan.analyzedCount}/${data.scan.totalStudents} проаналізовано` : '—'}
+                {data
+                  ? `${Math.min(data.scan.analyzedCount, data.scan.totalStudents)}/${data.scan.totalStudents} проаналізовано`
+                  : '—'}
               </b>
             </span>
             <span className="ml-auto">
