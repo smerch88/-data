@@ -15,13 +15,15 @@ type Phase = 'idle' | 'starting' | 'running' | 'stalled' | 'done' | 'error';
 export function ScanButton({
   asOfDate = '2025-08-21',
   onDone,
-  noAnalysisYet = false,
+  noAnalysisForDate = false,
 }: {
   asOfDate?: string;
   onDone?: () => void;
-  /** No analysis exists for the current view yet → label is "Зробити аналіз"
-   * (create) rather than "Оновити аналіз" (refresh an existing one). */
-  noAnalysisYet?: boolean;
+  /** No analysis exists for the *selected date itself* (an older
+   * auto-resolved run may still be on screen) → label is "Зробити аналіз"
+   * (create — runs for the selected date) rather than "Оновити аналіз"
+   * (refresh). An explicit historical pick stays "Оновити". */
+  noAnalysisForDate?: boolean;
 }) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [state, setState] = useState<ScanState | null>(null);
@@ -143,7 +145,7 @@ export function ScanButton({
           <AlertTriangle className="size-4" />
         ) : busy ? (
           <Loader2 className="size-4 animate-spin" />
-        ) : noAnalysisYet ? (
+        ) : noAnalysisForDate ? (
           <Sparkles className="size-4" />
         ) : (
           <RefreshCw className="size-4" />
@@ -153,7 +155,7 @@ export function ScanButton({
           (state ? `Аналіз… ${progress}/${state.totalStudents}` : 'Аналіз виконується…')}
         {phase === 'stalled' && 'Аналіз застряг…'}
         {(phase === 'idle' || phase === 'done' || phase === 'error') &&
-          (noAnalysisYet ? 'Зробити аналіз' : 'Оновити аналіз')}
+          (noAnalysisForDate ? 'Зробити аналіз' : 'Оновити аналіз')}
       </Button>
       {phase === 'stalled' && (
         <span className="text-xs text-amber-600 text-right max-w-[260px]">

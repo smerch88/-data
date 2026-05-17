@@ -47,6 +47,18 @@ export default function Dashboard() {
   const effAsOf = historicalRun?.asOfDate ?? asOf;
   const phase = data ? coursePhase(data.course.startDate, data.course.endDate, effAsOf) : null;
 
+  // Scan button label: "Зробити аналіз" only when there is no analysis for the
+  // *selected date itself* — i.e. nothing at all, or just an older
+  // auto-resolved run shown with the grey note. A run exactly at the demo date,
+  // or an explicit historical pick, keeps "Оновити аналіз".
+  const noAnalysisForDate = !data
+    ? false // still loading — don't flip the label until we know
+    : !data.selectedRun
+      ? true
+      : data.selectedRun.auto
+        ? data.selectedRun.asOfDate !== asOf
+        : false;
+
   // Delete a stored analysis run (any status). If the deleted run was the
   // one being viewed, drop back to live; then refresh timeline + overview.
   async function handleDeleteRun(r: AnalysisRun) {
@@ -116,7 +128,7 @@ export default function Dashboard() {
             <ScanButton
               asOfDate={asOf}
               onDone={reload}
-              noAnalysisYet={!!data?.noAnalysisYet}
+              noAnalysisForDate={noAnalysisForDate}
             />
           </div>
         </div>

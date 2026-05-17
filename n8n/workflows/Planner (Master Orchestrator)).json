@@ -333,9 +333,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT DISTINCT student_id,\n  ARRAY_AGG(m.text ORDER BY m.message_date DESC) AS recent_messages\nFROM slack_messages_n8n m\nWHERE m.is_from_student = TRUE\n  AND m.message_date <= $1::date\nGROUP BY m.student_id;",
+        "query": "WITH params AS (\n  SELECT\n    ($1::json->>'as_of')::date AS as_of,\n    ($1::json->>'student_id')  AS student_id\n)\nSELECT\n  s.student_id,\n  COALESCE(\n    (SELECT ARRAY_AGG(m.text ORDER BY m.message_date DESC)\n       FROM slack_messages_n8n m\n      WHERE m.student_id      = s.student_id\n        AND m.is_from_student = TRUE\n        AND m.message_date   <= p.as_of),\n    ARRAY[]::text[]\n  ) AS recent_messages\nFROM students_n8n s\nCROSS JOIN params p\nWHERE s.student_id::text = p.student_id;",
         "options": {
-          "queryReplacement": "=$1: {{ ($('Receive student_id').first().json.body || $('Receive student_id').first().json).as_of_date || '2025-08-21' }}"
+          "queryReplacement": "=$1: {{ JSON.stringify({ as_of: ($('Receive student_id').first().json.body || $('Receive student_id').first().json).as_of_date || '2025-08-21', student_id: ($('Receive student_id').first().json.body || $('Receive student_id').first().json).student_id }) }}"
         }
       },
       "type": "n8n-nodes-base.postgres",
@@ -415,7 +415,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH params AS (\n  SELECT\n    ($1::json->>'as_of')::date AS as_of,\n    ($1::json->>'student_id')  AS student_id\n)\nSELECT\n  h.hw_id,\n  h.module,\n  h.title,\n  h.deadline,\n  h.submitted_at,\n  h.status,\n  h.grade,\n  CASE WHEN h.submitted_at IS NOT NULL\n       AND  h.submitted_at::date > h.deadline\n       THEN TRUE ELSE FALSE\n  END AS was_late\nFROM homework h\nCROSS JOIN params p\nWHERE h.student_id = p.student_id\n  AND h.deadline <= p.as_of\n  AND (h.submitted_at IS NULL OR h.submitted_at::date <= p.as_of)\nORDER BY h.deadline ASC;",
+        "query": "WITH params AS (\n  SELECT\n    ($1::json->>'as_of')::date AS as_of,\n    ($1::json->>'student_id')  AS student_id\n),\nhw AS (\n  SELECT\n    h.hw_id,\n    h.module,\n    h.title,\n    h.deadline,\n    h.submitted_at,\n    h.status,\n    h.grade,\n    CASE WHEN h.submitted_at IS NOT NULL\n         AND  h.submitted_at::date > h.deadline\n         THEN TRUE ELSE FALSE\n    END AS was_late\n  FROM homework h\n  CROSS JOIN params p\n  WHERE h.student_id = p.student_id\n    AND h.deadline <= p.as_of\n    AND (h.submitted_at IS NULL OR h.submitted_at::date <= p.as_of)\n)\nSELECT hw_id, module, title, deadline, submitted_at, status, grade, was_late\nFROM hw\nUNION ALL\nSELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL\nWHERE NOT EXISTS (SELECT 1 FROM hw)\nORDER BY deadline ASC NULLS LAST;",
         "options": {
           "queryReplacement": "=$1: {{ JSON.stringify({    as_of: $json.as_of_date || '2025-08-21',    student_id: $json.student_id  }) }}"
         }
@@ -437,7 +437,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const signals  = $('Compute All Signals').first().json;\nconst hwRows   = $input.all().map(r => r.json);\n\nreturn [{\n  json: {\n    ...signals,\n    homework_30d: hwRows,\n  }\n}];"
+        "jsCode": "const signals  = $('Compute All Signals').first().json;\nconst hwRows   = $input.all()\n  .map(r => r.json)\n  .filter(h => h.hw_id !== null && h.hw_id !== undefined);\n\nreturn [{\n  json: {\n    ...signals,\n    homework_30d: hwRows,\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
