@@ -158,7 +158,6 @@ const spec = swaggerJsdoc({
     servers: [
       { url: '/', description: 'Same origin (recommended — use whichever host you loaded /docs from)' },
       { url: 'http://localhost:3000', description: 'Local dev (direct)' },
-      { url: 'http://213.199.49.241:8080', description: 'VPS (direct)' },
     ],
     components,
     tags: [

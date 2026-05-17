@@ -15,5 +15,13 @@ backups/
 data/oulad/anonymisedData.zip
 data/oulad/*.csv
 
-# Plain-text telegram chat dump (HTML export is in docs/telegram/, ignore .txt re-export)
-docs/telegram/messages.txt
+# ── Internal — NOT for the public repo / hackathon jury ──────────────
+# Private team Telegram export (messages + member photos) — whole tree.
+docs/telegram/
+# Cross-session AI working notes: candid dev notes, infra/host details,
+# rejected approaches. Kept locally, never published.
+docs/CLAUDE_NOTES.md
+# Local env override sometimes used by the Vite dev server.
+frontend/.env
+.env.*
+!.env.example
