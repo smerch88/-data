@@ -25,3 +25,14 @@ docs/CLAUDE_NOTES.md
 frontend/.env
 .env.*
 !.env.example
+
+# Scratch / backup / patch artifacts from local editing sessions —
+# must never reach the public repo.
+_bak*
+_patch*
+_tmp*
+tmp_*
+*.bak
+*.orig
+*.rej
+scratch/
