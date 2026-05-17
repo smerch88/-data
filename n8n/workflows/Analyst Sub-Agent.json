@@ -16,7 +16,10 @@
         -32
       ],
       "id": "f9c2171f-86b7-468c-aa83-bf0dbaf68b5d",
-      "name": "Analyst — Risk Analysis"
+      "name": "Analyst — Risk Analysis",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -74,7 +77,10 @@
           "id": "AnthropicAcct001",
           "name": "Anthropic account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {

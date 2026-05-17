@@ -33,7 +33,10 @@
         0
       ],
       "id": "853431c5-e76d-4d45-b368-4bd74b79b72c",
-      "name": "Communicator — Generate Draft"
+      "name": "Communicator — Generate Draft",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -61,7 +64,10 @@
           "id": "AnthropicAcct001",
           "name": "Anthropic account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {

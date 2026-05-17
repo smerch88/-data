@@ -87,8 +87,8 @@
         "options": {
           "batching": {
             "batch": {
-              "batchSize": 3,
-              "batchInterval": 3000
+              "batchSize": 1,
+              "batchInterval": 15000
             }
           },
           "timeout": 300000
@@ -102,7 +102,10 @@
       ],
       "id": "5d5a7c77-a924-4879-813e-efdcb0d2aa08",
       "name": "Call Planner per Student",
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {

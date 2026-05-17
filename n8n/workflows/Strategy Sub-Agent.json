@@ -33,7 +33,10 @@
         0
       ],
       "id": "cae7a5a1-b988-4743-93cd-6636987e69a4",
-      "name": "Strategy — Choose Action"
+      "name": "Strategy — Choose Action",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -61,7 +64,10 @@
           "id": "AnthropicAcct001",
           "name": "Anthropic account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {

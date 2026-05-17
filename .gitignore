@@ -37,5 +37,7 @@ tmp_*
 *.rej
 scratch/
 
-# One-off demo automation/recalc scripts (hardcoded names, not for public)
+# One-off demo automation/recalc/calibration scripts (hardcoded names,
+# parallel-session helpers) — kept local, never in the public repo.
 _recal*
+backend/_*.ts

@@ -97,9 +97,10 @@ async function finalizeRunsIfComplete(): Promise<void> {
     // Check staleness first — if triggered more than the stale threshold ago and still running, mark failed
     const nowMs = Date.now();
     const triggeredMs = new Date(triggeredAt).getTime();
-    // Runs are ~1-2 min now (n8n throttle lowered); a run still 'running'
-    // well past that is dead, not slow — fail it fast so the UI can react.
-    const STALE_RUN_MS = 5 * 60 * 1000;
+    // Paced n8n batch (1 student/~15s + retries) → a healthy 15-student run
+    // takes ~10-14 min. Hard backstop only; fast dead-detection is the
+    // separate `stalled` signal (90s grace, 0 fresh rows) in /scan/state.
+    const STALE_RUN_MS = 20 * 60 * 1000;
 
     // Count students and done results in parallel
     const [totalRow, doneRow] = await Promise.all([

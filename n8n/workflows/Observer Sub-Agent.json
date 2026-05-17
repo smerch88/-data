@@ -33,7 +33,10 @@
         0
       ],
       "id": "14488762-2158-49dd-83c7-e4d50b5e1c4b",
-      "name": "AI Agent"
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -91,7 +94,10 @@
           "id": "AnthropicAcct001",
           "name": "Anthropic account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
