@@ -10,7 +10,9 @@
  *    diverse final_result distribution).
  *  - Sample ~15 students proportionally across final_result categories so we
  *    cover all 4 demo personas (HIGH RISK / MEDIUM / SILENT BUT OK / FALSE ALARM).
- *  - Map AAA-2013J → "Algebra Foundations" course (renamed for relatability).
+ *  - Map AAA-2013J → GoIT "Fullstack JavaScript (online)" course; re-anchor the
+ *    whole 268-day calendar to 2025 via PRESENTATION_START (one uniform shift —
+ *    relative timing preserved, only the absolute calendar moves).
  *  - Invent 3 mentors and assign students round-robin.
  *  - For each student, take their actual assessments and submission dates.
  *  - Generate synthetic Slack messages aligned with their real engagement pattern
@@ -35,15 +37,22 @@ const SAMPLE_BY_OUTCOME = {
   Fail: 3, // MEDIUM RISK
   Withdrawn: 3, // HIGH RISK
 };
-// Course presentation start date — anchor for synthesizing real timestamps.
-// AAA 2013J means October 2013 presentation. Anchored to the actual OULAD
-// start so all derived timestamps (homework deadlines, submissions, logins,
-// slack messages) land entirely in the past — no future-dated rows.
-const PRESENTATION_START = new Date('2013-10-07T00:00:00Z');
+// Course presentation start date — the SINGLE anchor for every synthesized
+// timestamp. Underlying data is OULAD AAA-2013J (a real 268-day presentation).
+// We re-anchor the whole calendar to 2025 by shifting only this constant:
+// enrollment, homework deadlines, submissions, logins and slack all move by
+// the SAME offset, so relative timing / engagement patterns are preserved
+// exactly (this is a uniform clock shift, NOT per-row date fudging). With
+// 2025-01-13 the cohort runs ~Jan→Oct 2025 (registrations from ~Aug 2024) and
+// is fully in the past vs a 2026 "today". The dataset is relabeled as a GoIT
+// "Fullstack JavaScript (online)" course (see ourCourses); OULAD provenance is
+// preserved in _meta. Rationale + the one-time rule exception: see
+// docs/CLAUDE_NOTES.md (2026-05-17 entry).
+const PRESENTATION_START = new Date('2025-01-13T00:00:00Z');
 const DAY_MS = 24 * 60 * 60 * 1000;
 // Anchor synthetic Slack messages inside the course timeframe (mid-to-late
-// presentation, around day 220 of the 268-day window = ~May 2014). Without
-// this they'd be relative to Date.now() and break the "no future dates" rule.
+// presentation, ~day 220 of the 268-day window ≈ Aug 2025). Defined relative
+// to PRESENTATION_START, so it shifts automatically with the anchor.
 const SLACK_ANCHOR_MS = PRESENTATION_START.getTime() + 220 * 24 * 60 * 60 * 1000;
 
 function parseCsv(filePath) {
@@ -414,14 +423,20 @@ async function main() {
     (submissionsByStudent[sa.id_student] ||= []).push(sa);
   }
 
-  // Build courses (single course = AAA-2013J → "Algebra Foundations" demo)
+  // Build courses. Underlying presentation is OULAD AAA-2013J, relabeled as
+  // GoIT "Fullstack JavaScript (online)" — the 10-month evening track
+  // (HTML+CSS → JS → React → Node.js → React Native, ≈43 weeks, 5 modules).
+  // `id` is kept stable (opaque key) so existing course_id references don't
+  // churn; only the user-facing labels change. duration_weeks=43 mirrors
+  // GoIT's ~10 months; the OULAD event timeline underneath is still its real
+  // 268 days (deliberately NOT stretched — stretching would fabricate timing).
   const ourCourses = [
     {
       id: `${TARGET_MODULE.toLowerCase()}_${TARGET_PRESENTATION.toLowerCase()}`,
-      name: 'Algebra Foundations (Autumn 2013)',
-      total_modules: Math.max(1, allAssessments.length),
-      duration_weeks: Math.round(Number(courses[0].module_presentation_length) / 7),
-      format: 'self_paced',
+      name: 'Fullstack JavaScript (online)',
+      total_modules: 5,
+      duration_weeks: 43,
+      format: 'live',
     },
   ];
 
@@ -529,6 +544,12 @@ async function main() {
       license: 'CC BY 4.0',
       target_module: TARGET_MODULE,
       target_presentation: TARGET_PRESENTATION,
+      relabeled_as: 'GoIT Fullstack JavaScript (online)',
+      presentation_start: PRESENTATION_START.toISOString().slice(0, 10),
+      calendar_note:
+        'OULAD AAA-2013J re-anchored to 2025 via a single uniform offset ' +
+        '(PRESENTATION_START). Relative timing/engagement preserved; only the ' +
+        'absolute calendar moved. Course labels are GoIT-styled for the demo.',
       sampled_students: ourStudents.length,
       assessments: homeworkDefs.length,
       generated_at: new Date().toISOString(),
