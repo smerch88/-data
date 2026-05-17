@@ -14,8 +14,12 @@
 # Deploy this config:
 #   sudo cp infra/caddy/Caddyfile.example /etc/caddy/Caddyfile
 #   sudo sed -i "s/__DOMAIN__/db.my-own-testing.space/" /etc/caddy/Caddyfile
+#   sudo sed -i "s/__N8N_DOMAIN__/n8n.my-own-testing.space/" /etc/caddy/Caddyfile
 #   sudo sed -i "s/__EMAIL__/admin@example.com/" /etc/caddy/Caddyfile
 #   sudo systemctl reload caddy
+#
+# DNS prerequisite: an A record for __N8N_DOMAIN__ must point to this VPS
+# before reload, otherwise Caddy's Let's Encrypt challenge for that host fails.
 #
 # Logs: journalctl -u caddy -f
 # Verify: curl -I https://db.my-own-testing.space
@@ -44,6 +48,30 @@ __DOMAIN__ {
     # Avoids permission issues with Caddy's restricted systemd unit when
     # writing to /var/log; the systemd unit allows journald + /var/lib/caddy
     # but file logging in /var/log requires extra ReadWritePaths config.
+    log {
+        format json
+    }
+}
+
+__N8N_DOMAIN__ {
+    # Reverse proxy to n8n in the local docker-compose stack
+    # (docker-compose binds it to 127.0.0.1:5678 when BIND_HOST=127.0.0.1).
+    # read_timeout is generous: WF8 batch analysis runs ~4-7 min, and the
+    # n8n editor keeps a long-lived WebSocket push connection (Caddy upgrades
+    # WS automatically — no extra config needed).
+    reverse_proxy 127.0.0.1:5678 {
+        transport http {
+            read_timeout 600s
+        }
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+
     log {
         format json
     }

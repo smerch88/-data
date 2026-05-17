@@ -1,0 +1,121 @@
+{
+  "name": "Results",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/planner/results",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7688cd5b-6cfd-4752-882d-9ba14fb2d261",
+      "name": "Results Trigger",
+      "webhookId": "7a18f2b3-4523-425d-9e7b-4cbccae1b7bf"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  ar.student_id,\n  s.name,\n  s.slack_id,\n  s.course,\n  s.mentor_id,\n  ar.risk_score,\n  ar.risk_level,\n  ar.urgency,\n  ar.student_state,\n  ar.primary_drivers,\n  ar.supporting_evidence,\n  ar.draft_message,\n  ar.mentor_summary,\n  ar.dashboard_label,\n  ar.analyzed_at\nFROM analysis_results ar\nLEFT JOIN students_n8n s ON s.student_id = ar.student_id\nORDER BY ar.risk_score DESC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        224,
+        0
+      ],
+      "id": "05b8a03a-9041-487b-895d-1a79463995e2",
+      "name": "Get Analysis Results",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const students = $input.all().map(r => r.json);\n\nreturn [{\n  json: {\n    total:        students.length,\n    high_risk:    students.filter(s => s.risk_level === 'high').length,\n    medium_risk:  students.filter(s => s.risk_level === 'medium').length,\n    low_risk:     students.filter(s => s.risk_level === 'low').length,\n    generated_at: new Date().toISOString(),\n    students: students.map(s => ({\n      student_id:          s.student_id,\n      name:                s.name,\n      slack_id:            s.slack_id,\n      course:              s.course,\n      mentor_id:           s.mentor_id,\n      risk_score:          s.risk_score,\n      risk_level:          s.risk_level,\n      urgency:             s.urgency,\n      student_state:       s.student_state,\n      primary_drivers:     s.primary_drivers     || [],\n      supporting_evidence: s.supporting_evidence || [],\n      draft_message:       s.draft_message       || '',\n      mentor_summary:      s.mentor_summary      || '',\n      dashboard_label:     s.dashboard_label     || '',\n      analyzed_at:         s.analyzed_at,\n    }))\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "289038a4-0b03-4470-8df1-545997210df8",
+      "name": "Format Results"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        0
+      ],
+      "id": "276a3c6c-e317-4dce-acfd-9e380ea185f9",
+      "name": "Return Results"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Results Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Analysis Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Analysis Results": {
+      "main": [
+        [
+          {
+            "node": "Format Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Results": {
+      "main": [
+        [
+          {
+            "node": "Return Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b7698ecb-d674-4251-8686-9e15fc345a49",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "45f2a08fe6722181d73f4feb2cba04ef8dd2c1c068d919bc0c8e6b4c6eb2d67e"
+  },
+  "id": "rmkTqVq22UEmnwo4",
+  "tags": []
+}

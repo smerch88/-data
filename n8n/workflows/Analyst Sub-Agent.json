@@ -1,0 +1,262 @@
+{
+  "name": "Analyst Sub-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=={{ $json.prompt_text }}",
+        "options": {
+          "systemMessage": "=Ти Analyst Agent онлайн-школи.\n\nRisk score вже розрахований математично — НЕ змінюй його.\nТвоя задача — пояснити ситуацію людською мовою.\n\nЩо робиш:\n1. primary_drivers — топ-3 головні причини ризику\n   (конкретно, зрозуміло для ментора)\n2. supporting_evidence — факти з даних які підтверджують\n3. student_state — психологічний стан студента\n\nSTUDENT_STATE варіанти:\n- overwhelmed: стрес, темп, складність\n- disengaged: втрата інтересу, зникнення\n- struggling: не розуміє матеріал (низькі оцінки)\n- distracted: зовнішні обставини\n- silent_but_ok: мало активний але здає ДЗ\n- on_track: все добре\n\nКРИТИЧНО: Відповідай ТІЛЬКИ валідним JSON без markdown."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        576,
+        -32
+      ],
+      "id": "f9c2171f-86b7-468c-aa83-bf0dbaf68b5d",
+      "name": "Analyst — Risk Analysis"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\nfunction c(val) {\n  if (val === null || val === undefined) return val;\n  if (typeof val !== 'string') return val;\n  return val.replace(/^\"(.*)\"$/s, '$1');\n}\n\nconst rawText = input.output || input.text || input.response || '';\n\nconst clean = rawText\n  .replace(/```json/gi, '')\n  .replace(/```/g, '')\n  .trim();\n\nlet parsed;\ntry {\n  parsed = JSON.parse(clean);\n} catch (e) {\n  console.error('Analyst parse error:', e.message);\n  parsed = {\n    primary_drivers:     [],\n    supporting_evidence: [],\n    student_state:       'on_track',\n  };\n}\n\nconst prev = $('Prepare Analyst Input').first().json;\n\n// Беремо score з score_breakdown.total як найнадійніше джерело\nconst riskScore = prev.score_breakdown?.total\n  || Number(prev.risk_score_calculated)\n  || 0;\n\nreturn [{\n  json: {\n    ...prev,\n\n    // Математично розраховані\n    risk_score:               riskScore,\n    risk_level:               c(prev.risk_level_calculated)         || 'low',\n    urgency:                  c(prev.urgency_calculated)            || 'monitor',\n    active_stages:            prev.active_stages_calculated         || [],\n    days_to_dropout_estimate: c(prev.days_to_dropout)              || null,\n    red_zone:                 prev.red_zone                        || false,\n    score_breakdown:          prev.score_breakdown                 || {},\n\n    // Claude пояснює\n    primary_drivers:     parsed.primary_drivers              || [],\n    supporting_evidence: parsed.supporting_evidence          || [],\n    student_state:       c(parsed.student_state)             || 'on_track',\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -32
+      ],
+      "id": "6135e339-4f9a-445a-a329-9ade8e6a368d",
+      "name": "Analyst Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1152,
+        -32
+      ],
+      "id": "7dcef0dc-5a69-466b-9c68-c000d9d5152f",
+      "name": "Return Analyst Result"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-5-20250929",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {
+          "maxTokensToSample": 500,
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        192
+      ],
+      "id": "554b90fc-abfc-408b-aa66-41975101d152",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "AnthropicAcct001",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/analyst/run",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -528,
+        -32
+      ],
+      "id": "3f24626f-f44a-4081-ad7b-26d186842d7c",
+      "name": "Analyst Trigger",
+      "webhookId": "14d4040b-39b3-4c1d-97e8-6fd7d869ce77"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input    = $input.first().json;\nconst computed = input.computed_signals || {};\nconst observer = input.observer_result  || {};\nconst hwList   = input.homework_30d     || input.homework_list || [];\nconst messages = input.recent_messages  || [];\nconst student  = input.student          || {};\n\nconst activeSignals = (observer.signals || [])\n  .filter(s => s.severity >= 5)\n  .map(s => '- ' + s.signal_type + ': severity ' + s.severity + ' | ' + s.details)\n  .join('\\n');\n\nconst hwFormatted = hwList.map(h =>\n  (h.title || h.hw_id || '?') +\n  ' | дедлайн: ' + (h.deadline?.split('T')[0] || '?') +\n  ' | здано: ' + (h.submitted_at?.split('T')[0] || 'не здано') +\n  ' | статус: ' + h.status +\n  ' | оцінка: ' + (h.grade !== null && h.grade !== undefined ? h.grade : 'н/а') +\n  ' | ' + (h.was_late ? 'запізно' : 'вчасно')\n).join('\\n');\n\nconst promptText =\n  'Проаналізуй ситуацію студента і поясни причини ризику.\\n\\n' +\n  'СТУДЕНТ: ' + (student.name || '?') + ' | ' + (student.course || '?') + '\\n\\n' +\n  'МАТЕМАТИЧНО РОЗРАХОВАНИЙ РИЗИК:\\n' +\n  '- risk_score: ' + input.risk_score_calculated + '\\n' +\n  '- risk_level: ' + input.risk_level_calculated + '\\n' +\n  '- urgency: ' + input.urgency_calculated + '\\n' +\n  '- days_to_dropout: ' + input.days_to_dropout + '\\n' +\n  '- red_zone: ' + input.red_zone + '\\n' +\n  '- score_breakdown: base=' + input.score_breakdown.base_score +\n    ' + modifiers=' + input.score_breakdown.modifiers +\n    ' = ' + input.score_breakdown.total + '\\n\\n' +\n  'АКТИВНІ СИГНАЛИ (severity >= 5):\\n' +\n  (activeSignals || 'немає') + '\\n\\n' +\n  'ЧИСЛОВІ ДАНІ:\\n' +\n  '- Пропущено ДЗ: ' + (computed.missed_homework_count || 0) + '\\n' +\n  '- Запізнілих ДЗ: ' + (computed.late_homework_count || 0) + '\\n' +\n  '- Днів без входу: ' + (computed.last_login_days_ago == null ? 'жодного входу станом на дату' : computed.last_login_days_ago) + '\\n' +\n  '- Днів без повідомлень: ' + (computed.last_message_days_ago == null ? 'жодного повідомлення станом на дату' : computed.last_message_days_ago) + '\\n' +\n  '- submission_timing_shift: ' + (computed.submission_timing_shift || false) + '\\n' +\n  '- has_explicit_dropout_intent: ' + (observer.has_explicit_dropout_intent || false) + '\\n\\n' +\n  'HOMEWORK ІСТОРІЯ:\\n' +\n  (hwFormatted || 'немає') + '\\n\\n' +\n  'ОСТАННІ ПОВІДОМЛЕННЯ:\\n' +\n  (messages.length > 0 ? messages.join('\\n') : 'немає') + '\\n\\n' +\n  'Поверни ТІЛЬКИ валідний JSON:\\n' +\n  '{\\n' +\n  '  \"primary_drivers\": [\"топ-3 причини людською мовою\"],\\n' +\n  '  \"supporting_evidence\": [\"конкретні факти з даних\"],\\n' +\n  '  \"student_state\": \"overwhelmed|disengaged|struggling|distracted|silent_but_ok|on_track\"\\n' +\n  '}';\n\nreturn [{\n  json: {\n    ...input,\n    prompt_text: promptText,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -32
+      ],
+      "id": "61c91427-6625-43c2-b441-36265c1b61ba",
+      "name": "Prepare Analyst Input"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input    = $input.first().json;\nconst computed = input.computed_signals || {};\nconst observer = input.observer_result  || {};\nconst signals  = observer.signals       || [];\nconst hwSum    = input.hw_summary       || {};\nconst hwList   = input.homework_30d     || [];\n\n// ── BASE SCORE по етапах ─────────────────────────────────────\nconst stageScores = {\n  late_homework:        10,\n  missed_live_sessions: 10,\n  stopped_questions:    15,\n  missed_homework:      20,\n  login_gap:            15,\n  negative_messages:    20,\n  no_mentor_response:   25,\n  missed_exam:          25,\n};\n\nconst stageNumbers = {\n  late_homework:        1,\n  missed_live_sessions: 2,\n  stopped_questions:    3,\n  missed_homework:      4,\n  login_gap:            5,\n  negative_messages:    6,\n  no_mentor_response:   7,\n};\n\nlet baseScore          = 0;\nconst activeStages     = [];\nconst activeStageNames = [];\n\nsignals.forEach(signal => {\n  if (signal.severity >= 5) {\n    baseScore += stageScores[signal.signal_type] || 0;\n    activeStageNames.push(signal.signal_type);\n    const num = stageNumbers[signal.signal_type];\n    if (num) activeStages.push(num);\n  }\n});\n\nbaseScore = Math.min(baseScore, 100);\n\n// ── МОДИФІКАТОРИ ─────────────────────────────────────────────\nlet modifiers = 0;\nconst modifierLog = [];\n\nconst missedHw    = computed.missed_homework_count || 0;\nconst avgGrade    = parseFloat(hwSum.avg_grade || '100');\nconst dropIntent  = observer.has_explicit_dropout_intent || false;\nconst lastMsgDays = computed.last_message_days_ago ?? null;\nconst lastLogin   = computed.last_login_days_ago   ?? null;\n\n// Dropout intent\nif (dropIntent) {\n  modifiers += 15;\n  modifierLog.push('has_explicit_dropout_intent: +15');\n}\n\n// Submission timing shift\nif (computed.submission_timing_shift === true) {\n  modifiers += 10;\n  modifierLog.push('submission_timing_shift: +10');\n}\n\n// Missed homework\nif (missedHw >= 3) {\n  modifiers += 10;\n  modifierLog.push('missed_hw >= 3: +10');\n} else if (missedHw >= 1) {\n  modifiers += 5;\n  modifierLog.push('missed_hw >= 1: +5');\n}\n\n// Avg grade\nif (avgGrade < 65 && (hwSum.total || 0) > 0) {\n  modifiers += 5;\n  modifierLog.push('avg_grade < 65: +5');\n}\n\n// Правка 3 — пропущений іспит\nconst missedExam = hwList.some(h =>\n  h.status === 'missed' &&\n  (\n    (h.title || '').toLowerCase().includes('exam') ||\n    h.module >= 9\n  )\n);\nif (missedExam) {\n  modifiers += 15;\n  modifierLog.push('missed_exam: +15');\n}\n\n// Правка 3 — великі запізнення\nconst maxLateDays = hwList\n  .filter(h => h.was_late && h.submitted_at && h.deadline)\n  .map(h => {\n    const sub  = new Date(h.submitted_at);\n    const dead = new Date(h.deadline);\n    return Math.round((sub - dead) / (1000 * 60 * 60 * 24));\n  })\n  .reduce((max, d) => Math.max(max, d), 0);\n\nif (maxLateDays > 30) {\n  modifiers += 10;\n  modifierLog.push(`max_late_days ${maxLateDays} > 30: +10`);\n} else if (maxLateDays > 14) {\n  modifiers += 5;\n  modifierLog.push(`max_late_days ${maxLateDays} > 14: +5`);\n}\n\n// Login gap\nif (lastLogin == null || lastLogin > 30) {\n  modifiers += 10;\n  modifierLog.push(`login_gap ${lastLogin == null ? 'нема входів станом на дату' : lastLogin} (>30): +10`);\n} else if (lastLogin > 14) {\n  modifiers += 5;\n  modifierLog.push(`login_gap ${lastLogin} > 14: +5`);\n}\n\n// ── ОБМЕЖЕННЯ ────────────────────────────────────────────────\nconst onlySilent =\n  activeStageNames.length === 1 &&\n  activeStageNames[0] === 'stopped_questions';\nif (onlySilent) {\n  baseScore = Math.min(baseScore, 25);\n  modifiers = 0;\n}\n\nif (missedHw === 0 && lastLogin != null && lastLogin <= 3) {\n  baseScore = Math.min(baseScore, 20);\n  modifiers = 0;\n}\n\n// ── ФІНАЛЬНИЙ SCORE ──────────────────────────────────────────\nlet riskScore = Math.min(baseScore + modifiers, 100);\nriskScore     = Math.max(riskScore, 0);\n\n// ЧЕРВОНА ЗОНА\nconst redZone =\n  missedHw >= 3 &&\n  lastMsgDays >= 10 &&\n  dropIntent === true;\nif (redZone) riskScore = Math.max(riskScore, 85);\n\n// Timing shift + late homework\nif (\n  computed.submission_timing_shift === true &&\n  activeStageNames.includes('late_homework') &&\n  missedHw === 0 &&\n  !dropIntent\n) {\n  riskScore = Math.max(riskScore, 40);\n  modifierLog.push('timing_shift + late_hw → min 40');\n}\n\n// ── RISK LEVEL ───────────────────────────────────────────────\nlet riskLevel;\nif (riskScore >= 70)      riskLevel = 'high';\nelse if (riskScore >= 40) riskLevel = 'medium';\nelse                      riskLevel = 'low';\n\n// ── URGENCY ──────────────────────────────────────────────────\nlet urgency = 'monitor';\n\nconst hasStage67 = activeStageNames.some(s =>\n  ['negative_messages', 'no_mentor_response'].includes(s)\n);\nconst hasStage5  = activeStageNames.includes('login_gap');\nconst hasStage34 = activeStageNames.some(s =>\n  ['stopped_questions', 'missed_homework'].includes(s)\n);\n\nif (hasStage67 || redZone || dropIntent) {\n  urgency = 'immediate';\n} else if (hasStage5 || hasStage34) {\n  urgency = 'this_week';\n} else if (missedExam || maxLateDays > 14) {\n  urgency = 'this_week';\n} else if (computed.submission_timing_shift === true) {\n  urgency = 'this_week';\n}\n\n// ── DAYS TO DROPOUT ──────────────────────────────────────────\nlet daysToDropout;\nif (signals.some(s => s.signal_type === 'no_mentor_response' && s.severity >= 7)) {\n  daysToDropout = '1-5 днів';\n} else if (signals.some(s => s.signal_type === 'negative_messages' && s.severity >= 7)) {\n  daysToDropout = '5-7 днів';\n} else if (signals.some(s => s.signal_type === 'login_gap' && s.severity >= 7)) {\n  daysToDropout = '7-10 днів';\n} else if (hasStage34) {\n  daysToDropout = '10-14 днів';\n} else if (activeStageNames.length > 0) {\n  daysToDropout = '3-4 тижні';\n} else {\n  daysToDropout = 'немає ризику';\n}\n\nreturn [{\n  json: {\n    ...input,\n    risk_score_calculated:    riskScore,\n    risk_level_calculated:    riskLevel,\n    urgency_calculated:       urgency,\n    active_stages_calculated: activeStages,\n    active_stage_names:       activeStageNames,\n    days_to_dropout:          daysToDropout,\n    red_zone:                 redZone,\n    score_breakdown: {\n      base_score:   baseScore,\n      modifiers:    modifiers,\n      modifier_log: modifierLog,\n      total:        riskScore,\n    },\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        -32
+      ],
+      "id": "549b5972-c117-4cc7-be5a-3ba9131b557d",
+      "name": "Calculate Risk Score"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SET app.as_of = $1;\n\nSELECT\n  hw_id, module, title, deadline,\n  submitted_at, status, grade,\n  CASE WHEN submitted_at IS NOT NULL\n       AND  submitted_at::date > deadline\n       THEN TRUE ELSE FALSE\n  END AS was_late\nFROM homework\nWHERE student_id = $2\n  AND deadline <= $1::date\n  AND (submitted_at IS NULL OR submitted_at::date <= $1::date)\nORDER BY deadline ASC;",
+        "options": {
+          "queryReplacement": "=$1: {{ ($input.first().json.body || $input.first().json).as_of_date || '2025-08-21' }} $2: {{ ($input.first().json.body || $input.first().json).student_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -320,
+        -32
+      ],
+      "id": "d6149be3-9c1f-4857-8e5c-ef020ae6d767",
+      "name": "Load Homework History",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const hwRows = $input.all().map(r => r.json);\nconst grades = hwRows.filter(h => h.grade !== null).map(h => h.grade);\n\nconst trigger = $('Analyst Trigger').first().json;\nconst data    = trigger.body || trigger;\n\nreturn [{\n  json: {\n    student_id:       data.student_id,\n    trigger:          data.trigger,\n    student:          data.student,\n    computed_signals: data.computed_signals,\n    recent_messages:  data.recent_messages,\n    observer_result:  data.observer_result,  // ← ДОДАТИ ЦЕ\n    homework_30d:     hwRows,\n    hw_summary: {\n      total:     hwRows.length,\n      graded:    hwRows.filter(h => h.status === 'graded').length,\n      missed:    hwRows.filter(h => h.status === 'missed').length,\n      late:      hwRows.filter(h => h.was_late === true).length,\n      avg_grade: grades.length\n        ? (grades.reduce((a, b) => a + b, 0) / grades.length).toFixed(1)\n        : null,\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        -32
+      ],
+      "id": "7761280a-b105-4454-addd-05c2c5a8da93",
+      "name": "Build HW Summary"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Analyst — Risk Analysis": {
+      "main": [
+        [
+          {
+            "node": "Analyst Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyst Response": {
+      "main": [
+        [
+          {
+            "node": "Return Analyst Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyst — Risk Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyst Trigger": {
+      "main": [
+        [
+          {
+            "node": "Load Homework History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Analyst Input": {
+      "main": [
+        [
+          {
+            "node": "Analyst — Risk Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Risk Score": {
+      "main": [
+        [
+          {
+            "node": "Prepare Analyst Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Homework History": {
+      "main": [
+        [
+          {
+            "node": "Build HW Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build HW Summary": {
+      "main": [
+        [
+          {
+            "node": "Calculate Risk Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7ef745b4-2d22-4552-9cfc-b865e2c07a16",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "45f2a08fe6722181d73f4feb2cba04ef8dd2c1c068d919bc0c8e6b4c6eb2d67e"
+  },
+  "id": "ep407Kz0xmXqVONK",
+  "tags": []
+}

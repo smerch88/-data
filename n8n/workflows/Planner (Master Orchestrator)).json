@@ -1,0 +1,687 @@
+{
+  "name": "Planner (Master Orchestrator)",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/observer/run",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1280,
+        -1024
+      ],
+      "id": "5d30aff7-68d2-4798-81e4-bcb44fe05d2a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cf5f62d2-ab79-4dfa-88aa-b76132da5e7e",
+              "leftValue": "={{ $json.observer_result.max_severity }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1056,
+        -1024
+      ],
+      "id": "a016145b-a554-41c1-b039-8c409ac8f078",
+      "name": "Gate — Severity Check"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/analyst/run",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -832,
+        -1360
+      ],
+      "id": "9cf9ac0a-0557-4b40-b3cd-04744dcae96b",
+      "name": "HTTP Request: Call Analyst"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8a5fc1be-c4a5-4513-aca9-665205cf1f8a",
+              "name": "risk_level",
+              "value": "\"low\"",
+              "type": "string"
+            },
+            {
+              "id": "ce66593d-0076-4a67-aea9-a6f43df4e58d",
+              "name": "risk_score",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "713d4785-5e86-4fe8-ac1c-d713127e372f",
+              "name": "recommended_action",
+              "value": "\"no_action\"",
+              "type": "string"
+            },
+            {
+              "id": "4165bf3d-747f-4ddb-82f4-fbff519ee2ee",
+              "name": "draft_message",
+              "value": "\"\"",
+              "type": "string"
+            },
+            {
+              "id": "502c9dfb-c499-4bb5-b1fb-8520761d984c",
+              "name": "mentor_summary",
+              "value": "\"Студент в нормі\"",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        -944
+      ],
+      "id": "d08b47c5-4db4-48ca-a1d8-24a196a91034",
+      "name": "No Action"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "14f09de4-de2a-468d-a048-8a739dba7398",
+              "leftValue": "={{ $json.risk_score }}",
+              "rightValue": 20,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -640,
+        -1200
+      ],
+      "id": "d57000ba-8692-4bc7-ad30-e33e1ee1f6ac",
+      "name": "GATE: risk_level high/medium?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/strategy/run",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -352,
+        -1376
+      ],
+      "id": "aa9d2d63-531c-4d22-a69d-a604b4d31e13",
+      "name": "HTTP Request: Call Strategy"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ee178e8b-a576-418f-9d55-160222bbdec9",
+              "leftValue": "={{ $json.recommended_action }}",
+              "rightValue": "no_action",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -160,
+        -1168
+      ],
+      "id": "f025aafc-33fc-45ea-a2c2-2b53bda13690",
+      "name": "Gate — Action"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/communicator/run",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        -1360
+      ],
+      "id": "d8c4ce6a-edd9-4ceb-b19a-b4fe5ec9702b",
+      "name": "HTTP Request: Call Communicator"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// Очищення зайвих лапок\nfunction c(val) {\n  if (val === null || val === undefined) return val;\n  if (typeof val !== 'string') return val;\n  return val.replace(/^\"(.*)\"$/s, '$1');\n}\n\nreturn [{\n  json: {\n    // Ідентифікація\n    student_id:   input.student_id,\n    student_name: input.student?.name      || input.student_name,\n    slack_id:     input.student?.slack_id  || input.slack_id,\n    course:       input.student?.course    || input.course,\n    mentor_id:    input.student?.mentor_id || input.mentor_id,\n\n    // Сигнали\n    signals: {\n      last_login_days_ago:     input.computed_signals?.last_login_days_ago     || 0,\n      missed_homework_count:   input.computed_signals?.missed_homework_count   || 0,\n      late_homework_count:     input.computed_signals?.late_homework_count     || 0,\n      submission_timing_shift: input.computed_signals?.submission_timing_shift || false,\n      last_message_days_ago:   input.computed_signals?.last_message_days_ago   || 0,\n      wrote_to_mentor:         input.computed_signals?.wrote_to_mentor         || false,\n      activity_drop:           input.computed_signals?.activity_drop           || false,\n    },\n\n    // Observer\n    observer: {\n      signals:                     input.observer_result?.signals                     || [],\n      max_severity:                input.observer_result?.max_severity                || 0,\n      sentiment:                   input.observer_result?.sentiment                   || 'neutral',\n      has_explicit_dropout_intent: input.observer_result?.has_explicit_dropout_intent || false,\n    },\n\n    // Analyst — очищаємо лапки\n    risk_score:               Number(c(String(input.risk_score || '0'))) || 0,\n    risk_level:               c(input.risk_level)               || 'low',\n    urgency:                  c(input.urgency)                   || 'monitor',\n    student_state:            c(input.student_state)             || 'on_track',\n    active_stages:            input.active_stages                || [],\n    days_to_dropout_estimate: c(input.days_to_dropout_estimate)  || null,\n    red_zone:                 input.red_zone                     || false,\n    score_breakdown:          input.score_breakdown              || {},\n    primary_drivers:          input.primary_drivers              || [],\n    supporting_evidence:      input.supporting_evidence          || [],\n\n    // Strategy — очищаємо лапки\n    recommended_action:        c(input.recommended_action)        || 'no_action',\n    secondary_action:          c(input.secondary_action)          || null,\n    priority:                  c(input.priority)                  || 'low',\n    timing:                    c(input.timing)                    || 'monitor',\n    expected_lift_qualitative: c(input.expected_lift_qualitative) || 'low',\n    rationale:                 c(input.rationale)                 || '',\n\n    // Communicator — очищаємо лапки\n    draft_message:   c(input.draft_message)   || '',\n    mentor_summary:  c(input.mentor_summary)  || '',\n    dashboard_label: c(input.dashboard_label) || '✅ OK',\n\n    // HW Summary\n    hw_summary: input.hw_summary || {},\n\n    // Службові\n    status:      'pending_review',\n    trigger:     input.trigger || 'manual',\n    analyzed_at: new Date().toISOString(),\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        -1024
+      ],
+      "id": "55b9f827-9f87-4e2a-8d3d-ef25fc4bec96",
+      "name": "Aggregate Final Payload"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($('Aggregate Final Payload').first().json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        944,
+        -1024
+      ],
+      "id": "edc0c80e-de28-4e88-b7cc-4ea3611e2252",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "planner/analyze",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2816,
+        -1024
+      ],
+      "id": "c7aabbde-04fe-4083-8bf6-7c67d6e3b404",
+      "name": "Receive student_id",
+      "webhookId": "90753d95-03d1-49a0-81f8-27d30bf5e801"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH params AS (\n  SELECT\n    ($1::json->>'as_of')::date AS as_of,\n    ($1::json->>'student_id')  AS student_id\n),\nhw_stats AS (\n  SELECT\n    h.student_id,\n    COUNT(CASE WHEN h.status = 'missed' THEN 1 END)              AS missed_hw,\n    COUNT(CASE WHEN h.submitted_at IS NOT NULL\n               AND h.submitted_at::date > h.deadline THEN 1 END) AS late_hw,\n    COUNT(h.id)                                                   AS total_hw\n  FROM homework h\n  CROSS JOIN params p\n  WHERE h.student_id = p.student_id\n    AND h.deadline <= p.as_of\n  GROUP BY h.student_id\n),\nlogin_stats AS (\n  SELECT\n    l.student_id,\n    MAX(l.login_date)                                                    AS last_login_date,\n    COUNT(CASE WHEN l.login_date >= p.as_of - 7   THEN 1 END)           AS last7_logins,\n    COUNT(CASE WHEN l.login_date >= p.as_of - 28\n               AND  l.login_date <  p.as_of - 7   THEN 1 END)           AS prev4wk_logins\n  FROM login_events_n8n l\n  CROSS JOIN params p\n  WHERE l.student_id = p.student_id\n    AND l.login_date <= p.as_of\n  GROUP BY l.student_id\n),\nmsg_stats AS (\n  SELECT\n    m.student_id,\n    MAX(m.message_date)      AS last_msg_date,\n    BOOL_OR(m.to_mentor)     AS wrote_to_mentor\n  FROM slack_messages_n8n m\n  CROSS JOIN params p\n  WHERE m.student_id = p.student_id\n    AND m.is_from_student = TRUE\n    AND m.message_date <= p.as_of\n  GROUP BY m.student_id\n)\nSELECT\n  s.student_id,\n  s.name,\n  s.slack_id,\n  s.course,\n  s.mentor_id,\n  s.status,\n  p.as_of - ls.last_login_date    AS last_login_days_ago,\n  ls.last7_logins                  AS last7_logins,\n  ls.prev4wk_logins                AS prev4wk_logins,\n  hw.missed_hw                     AS missed_hw,\n  hw.late_hw                       AS late_hw,\n  hw.total_hw                      AS total_hw,\n  p.as_of - ms.last_msg_date       AS last_msg_days_ago,\n  ms.wrote_to_mentor               AS wrote_to_mentor\nFROM students_n8n s\nCROSS JOIN params p\nLEFT JOIN hw_stats    hw ON hw.student_id = s.student_id\nLEFT JOIN login_stats ls ON ls.student_id = s.student_id\nLEFT JOIN msg_stats   ms ON ms.student_id = s.student_id\nWHERE s.student_id = p.student_id;",
+        "options": {
+          "queryReplacement": "=$1: {{ JSON.stringify({ \n  as_of: ($json.body || $json).as_of_date || '2025-08-21', \n  student_id: ($json.body || $json).student_id \n}) }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2592,
+        -1024
+      ],
+      "id": "b064b73e-455d-4f1e-ab06-a2793f44e40c",
+      "name": "Pull Student Context",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH params AS (\n  SELECT\n    ($1::json->>'as_of')::date  AS as_of,\n    ($1::json->>'student_id')   AS student_id\n),\nhw_ordered AS (\n    SELECT \n        h.student_id, \n        h.deadline, \n        h.submitted_at,\n        CASE WHEN h.submitted_at::date <= h.deadline THEN 1 ELSE 0 END AS on_time,\n        ROW_NUMBER() OVER (PARTITION BY h.student_id ORDER BY h.deadline) AS rn,\n        COUNT(*) OVER (PARTITION BY h.student_id) AS total\n    FROM homework h\n    CROSS JOIN params p\n    WHERE h.submitted_at IS NOT NULL \n      AND h.student_id = p.student_id\n      AND h.submitted_at::date <= p.as_of\n      AND h.deadline <= p.as_of\n),\nhist AS (\n    SELECT AVG(on_time::float) AS hist_rate\n    FROM hw_ordered \n    WHERE rn <= FLOOR(total * 0.6)\n),\nrecent AS (\n    SELECT AVG(on_time::float) AS recent_rate\n    FROM hw_ordered \n    WHERE rn > total - 3\n)\nSELECT\n    h.hist_rate,\n    r.recent_rate,\n    h.hist_rate > 0.8                            AS cond_hist,\n    r.recent_rate < 0.5                          AS cond_recent,\n    CASE WHEN h.hist_rate > 0.8 AND r.recent_rate < 0.5\n         THEN TRUE ELSE FALSE\n    END AS submission_timing_shift\nFROM hist h, recent r;",
+        "options": {
+          "queryReplacement": "=$1: {{ JSON.stringify({ as_of: ($json.body || $json).as_of_date || '2025-08-21', student_id: $json.student_id }) }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2368,
+        -1024
+      ],
+      "id": "3b68f208-431a-43bc-8af1-fa3dcea5a9db",
+      "name": "Submission Timing Shift",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT student_id,\n  ARRAY_AGG(m.text ORDER BY m.message_date DESC) AS recent_messages\nFROM slack_messages_n8n m\nWHERE m.is_from_student = TRUE\n  AND m.message_date <= $1::date\nGROUP BY m.student_id;",
+        "options": {
+          "queryReplacement": "=$1: {{ ($('Receive student_id').first().json.body || $('Receive student_id').first().json).as_of_date || '2025-08-21' }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2144,
+        -1024
+      ],
+      "id": "0aa44d45-dfd1-4332-ab42-7dcf761fbe36",
+      "name": "Get Recent Messages",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const base  = $('Pull Student Context').first().json;\nconst shift = $('Submission Timing Shift').first().json;\nconst input = $('Receive student_id').first().json;\nconst data  = input.body || input;\n\nif (!base || !base.student_id) {\n  return [{\n    json: {\n      error:              'Student not found',\n      student_id:         data.student_id,\n      risk_score:         0,\n      risk_level:         'low',\n      recommended_action: 'no_action',\n      dashboard_label:    '❓ Не знайдено'\n    }\n  }];\n}\n\nconst msgsItem = $('Get Recent Messages').all()\n  .find(r => r.json.student_id === base.student_id);\nconst recentMessages = msgsItem ? msgsItem.json.recent_messages || [] : [];\n\nconst avgWeekly    = (base.prev4wk_logins || 0) / 4;\nconst activityDrop = (base.last7_logins   || 0) < avgWeekly * 0.5;\n\n// Honest \"no activity as of date\": NULL/undefined -> null (NOT 999).\n// pg `date - date` is integer; .days kept only as pg-interval safety.\nfunction daysAgo(v) {\n  if (v === null || v === undefined) return null;\n  if (typeof v === 'object') return v.days ?? null;\n  return v;\n}\n\nconst lastMsgDays = daysAgo(base.last_msg_days_ago);\n\nconst rawLoginDays = daysAgo(base.last_login_days_ago);\n\nconst lastLoginDays =\n  rawLoginDays === null ? null : (rawLoginDays < 0 ? 0 : rawLoginDays);\n\nreturn [{\n  json: {\n    student_id: base.student_id,\n    trigger:    data.trigger    || 'manual',\n    as_of_date: data.as_of_date || '2025-08-21',\n    student: {\n      name:      base.name,\n      slack_id:  base.slack_id,\n      course:    base.course,\n      mentor_id: base.mentor_id,\n      status:    base.status,\n    },\n    computed_signals: {\n      last_login_days_ago:     lastLoginDays,\n      missed_homework_count:   Number(base.missed_hw)    || 0,\n      late_homework_count:     Number(base.late_hw)      || 0,\n      submission_timing_shift: shift.submission_timing_shift || false,\n      last_message_days_ago:   lastMsgDays,\n      wrote_to_mentor:         base.wrote_to_mentor      || false,\n      activity_drop:           activityDrop,\n      last7_logins:            Number(base.last7_logins) || 0,\n      avg_weekly_logins:       avgWeekly,\n    },\n    recent_messages: recentMessages,\n    homework_30d:    data.homework_30d || [],\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1920,
+        -1024
+      ],
+      "id": "526b9ab6-e947-489f-a223-0a29265a1a27",
+      "name": "Compute All Signals"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO analysis_results\n  (student_id, risk_score, risk_level, urgency,\n   recommended_action, secondary_action, priority,\n   student_state, primary_drivers, supporting_evidence,\n   draft_message, mentor_summary, dashboard_label, analyzed_at)\nVALUES (\n  $1::json->>'student_id',\n  ($1::json->>'risk_score')::integer,\n  $1::json->>'risk_level',\n  $1::json->>'urgency',\n  $1::json->>'recommended_action',\n  $1::json->>'secondary_action',\n  $1::json->>'priority',\n  $1::json->>'student_state',\n  ($1::json->'primary_drivers')::jsonb,\n  ($1::json->'supporting_evidence')::jsonb,\n  $1::json->>'draft_message',\n  $1::json->>'mentor_summary',\n  $1::json->>'dashboard_label',\n  NOW()\n)\nON CONFLICT (student_id)\nDO UPDATE SET\n  risk_score          = EXCLUDED.risk_score,\n  risk_level          = EXCLUDED.risk_level,\n  urgency             = EXCLUDED.urgency,\n  recommended_action  = EXCLUDED.recommended_action,\n  secondary_action    = EXCLUDED.secondary_action,\n  priority            = EXCLUDED.priority,\n  student_state       = EXCLUDED.student_state,\n  primary_drivers     = EXCLUDED.primary_drivers,\n  supporting_evidence = EXCLUDED.supporting_evidence,\n  draft_message       = EXCLUDED.draft_message,\n  mentor_summary      = EXCLUDED.mentor_summary,\n  dashboard_label     = EXCLUDED.dashboard_label,\n  analyzed_at         = NOW();",
+        "options": {
+          "queryReplacement": "=$1: {{ JSON.stringify($('Aggregate Final Payload').first().json) }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        720,
+        -1024
+      ],
+      "id": "a55fdf5a-7d7f-42a9-89de-3bb4000159b9",
+      "name": "Save Analysis Result",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM analysis_results \nWHERE student_id = $1::json->>'student_id';",
+        "options": {
+          "queryReplacement": "=$1: {{ JSON.stringify($json) }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        496,
+        -1024
+      ],
+      "id": "e3fbef35-5040-48d0-bcfc-2ba775640025",
+      "name": "Clear Student Result",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH params AS (\n  SELECT\n    ($1::json->>'as_of')::date AS as_of,\n    ($1::json->>'student_id')  AS student_id\n)\nSELECT\n  h.hw_id,\n  h.module,\n  h.title,\n  h.deadline,\n  h.submitted_at,\n  h.status,\n  h.grade,\n  CASE WHEN h.submitted_at IS NOT NULL\n       AND  h.submitted_at::date > h.deadline\n       THEN TRUE ELSE FALSE\n  END AS was_late\nFROM homework h\nCROSS JOIN params p\nWHERE h.student_id = p.student_id\n  AND h.deadline <= p.as_of\n  AND (h.submitted_at IS NULL OR h.submitted_at::date <= p.as_of)\nORDER BY h.deadline ASC;",
+        "options": {
+          "queryReplacement": "=$1: {{ JSON.stringify({    as_of: $json.as_of_date || '2025-08-21',    student_id: $json.student_id  }) }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1712,
+        -1024
+      ],
+      "id": "f2437d5a-7db7-4f34-b169-f4413ed5fa6a",
+      "name": "Load Homework",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const signals  = $('Compute All Signals').first().json;\nconst hwRows   = $input.all().map(r => r.json);\n\nreturn [{\n  json: {\n    ...signals,\n    homework_30d: hwRows,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1504,
+        -1024
+      ],
+      "id": "3049f964-b664-46ad-b10c-6d4753d99f06",
+      "name": "Attach Homework"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Gate — Severity Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gate — Severity Check": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Call Analyst",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aggregate Final Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Call Analyst": {
+      "main": [
+        [
+          {
+            "node": "GATE: risk_level high/medium?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GATE: risk_level high/medium?": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Call Strategy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Call Strategy": {
+      "main": [
+        [
+          {
+            "node": "Gate — Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gate — Action": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Call Communicator",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aggregate Final Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Call Communicator": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Final Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Final Payload": {
+      "main": [
+        [
+          {
+            "node": "Clear Student Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Action": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Final Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive student_id": {
+      "main": [
+        [
+          {
+            "node": "Pull Student Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Student Context": {
+      "main": [
+        [
+          {
+            "node": "Submission Timing Shift",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submission Timing Shift": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Messages": {
+      "main": [
+        [
+          {
+            "node": "Compute All Signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute All Signals": {
+      "main": [
+        [
+          {
+            "node": "Load Homework",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Analysis Result": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Student Result": {
+      "main": [
+        [
+          {
+            "node": "Save Analysis Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Homework": {
+      "main": [
+        [
+          {
+            "node": "Attach Homework",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Homework": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "bf5db786-c1c0-4957-9950-1432320be761",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "45f2a08fe6722181d73f4feb2cba04ef8dd2c1c068d919bc0c8e6b4c6eb2d67e"
+  },
+  "id": "KlHPpGIgS5blrYHb",
+  "tags": []
+}

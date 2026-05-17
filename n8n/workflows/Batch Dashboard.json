@@ -1,0 +1,329 @@
+{
+  "name": "Batch Dashboard",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/planner/batch",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        -128
+      ],
+      "id": "cb1e40e9-f46f-4515-a370-f2def0bcbdf6",
+      "name": "Batch Dashboard Request",
+      "webhookId": "dd43d8fd-e5c8-495c-9236-ca5b238512c3"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SET app.as_of = $1;\n\nWITH hw_ordered AS (\n  SELECT student_id, deadline, submitted_at,\n    CASE WHEN submitted_at::date <= deadline THEN 1 ELSE 0 END AS on_time,\n    ROW_NUMBER() OVER (PARTITION BY student_id ORDER BY deadline) AS rn,\n    COUNT(*) OVER (PARTITION BY student_id) AS total\n  FROM homework WHERE submitted_at IS NOT NULL\n    AND submitted_at::date <= $1::date AND deadline <= $1::date\n),\nhist AS (\n  SELECT student_id, AVG(on_time::float) AS hist_rate\n  FROM hw_ordered WHERE rn <= FLOOR(total * 0.6)\n  GROUP BY student_id\n),\nrecent AS (\n  SELECT student_id, AVG(on_time::float) AS recent_rate\n  FROM hw_ordered WHERE rn > total - 3\n  GROUP BY student_id\n)\nSELECT h.student_id,\n  CASE WHEN hi.hist_rate > 0.8 AND r.recent_rate < 0.5\n       THEN TRUE ELSE FALSE\n  END AS submission_timing_shift\nFROM (SELECT DISTINCT student_id FROM homework) h\nLEFT JOIN hist   hi ON hi.student_id = h.student_id\nLEFT JOIN recent r  ON r.student_id  = h.student_id;",
+        "options": {
+          "queryReplacement": "=$1: {{ ($input.first().json.body || $input.first().json).as_of_date || '2025-08-21' }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1120,
+        -128
+      ],
+      "id": "75cdd860-03fb-4976-9ab7-bf95faad189f",
+      "name": "Timing Shift All",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  s.student_id, s.name, s.slack_id, s.course, s.mentor_id, s.status,\n  MAX(l.login_date)                                              AS last_login_date,\n  COUNT(CASE WHEN l.login_date >= $1::date - 7   THEN 1 END)   AS last7_logins,\n  COUNT(CASE WHEN l.login_date >= $1::date - 28\n             AND  l.login_date <  $1::date - 7   THEN 1 END)   AS prev4wk_logins,\n  COUNT(CASE WHEN h.status = 'missed'            THEN 1 END)   AS missed_hw,\n  COUNT(CASE WHEN h.submitted_at IS NOT NULL\n             AND  h.submitted_at::date > h.deadline THEN 1 END) AS late_hw,\n  COUNT(h.id)                                                   AS total_hw,\n  $1::date - MAX(m.message_date)                                AS last_msg_days_ago,\n  BOOL_OR(m.to_mentor)                                          AS wrote_to_mentor\nFROM students_n8n s\nLEFT JOIN login_events_n8n   l ON l.student_id = s.student_id AND l.login_date <= $1::date\nLEFT JOIN homework           h ON h.student_id = s.student_id AND h.deadline <= $1::date\nLEFT JOIN slack_messages_n8n m ON m.student_id = s.student_id\n                              AND m.is_from_student = TRUE\n                              AND m.message_date <= $1::date\nGROUP BY s.student_id, s.name, s.slack_id, s.course, s.mentor_id, s.status\nORDER BY s.student_id;",
+        "options": {
+          "queryReplacement": "=$1: {{ ($('Batch Dashboard Request').first().json.body || $('Batch Dashboard Request').first().json).as_of_date || '2025-08-21' }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        896,
+        -128
+      ],
+      "id": "7dcbec5b-15b2-40c8-84a7-200855e2ce98",
+      "name": "Get All Active Students",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Minimal per-student request for the Planner.\n// The Planner re-derives ALL signals from its own as_of-bounded\n// queries (Pull Student Context / Submission Timing Shift /\n// Get Recent Messages), so forwarding identity + as_of is enough.\n// (Removed the previously dead computed_signals block — it was\n// recomputed/overwritten by the Planner and carried a 999 bug.)\nconst students = $('Get All Active Students').all().map(r => r.json);\nconst asOf = $('Batch Dashboard Request').first().json.body?.as_of_date || '2025-08-21';\n\nreturn students.map(s => ({\n  json: {\n    student_id: s.student_id,\n    trigger:    'batch',\n    as_of_date: asOf,\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -128
+      ],
+      "id": "182a7e1d-3faf-426f-91cf-e95822b7493a",
+      "name": "Build Batch Payload"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/planner/analyze",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 3,
+              "batchInterval": 3000
+            }
+          },
+          "timeout": 300000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1792,
+        -128
+      ],
+      "id": "5d5a7c77-a924-4879-813e-efdcb0d2aa08",
+      "name": "Call Planner per Student",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $input.all()\n  .map(r => r.json)\n  .filter(r => !r.error && r.risk_level); // тільки валідні результати\n\nconst order = { high: 0, medium: 1, low: 2 };\n\nresults.sort((a, b) =>\n  (order[a.risk_level] || 2) - (order[b.risk_level] || 2) ||\n  (b.risk_score || 0) - (a.risk_score || 0)\n);\n\nconst byMentor = results.reduce((acc, s) => {\n  const mid = s.mentor_id || s.student?.mentor_id;\n  if (!acc[mid]) acc[mid] = [];\n  acc[mid].push(s);\n  return acc;\n}, {});\n\nreturn [{\n  json: {\n    total:        results.length,\n    high_risk:    results.filter(s => s.risk_level === 'high').length,\n    medium_risk:  results.filter(s => s.risk_level === 'medium').length,\n    low_risk:     results.filter(s => s.risk_level === 'low').length,\n    students:     results,\n    by_mentor:    byMentor,\n    generated_at: new Date().toISOString(),\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        -128
+      ],
+      "id": "dc4729be-3fa9-4d18-a989-87f23b9f46df",
+      "name": "Sort by Risk"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($input.first().json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2688,
+        -128
+      ],
+      "id": "990c7376-ea74-4688-8450-9b1d717307ff",
+      "name": "Return Batch"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SET app.as_of = $1;\n\nSELECT student_id,\n  ARRAY_AGG(text ORDER BY message_date DESC) AS recent_messages\nFROM slack_messages_n8n\nWHERE is_from_student = TRUE\n  AND message_date <= $1::date\nGROUP BY student_id;",
+        "options": {
+          "queryReplacement": "=$1: {{ ($input.first().json.body || $input.first().json).as_of_date || '2025-08-21' }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1344,
+        -128
+      ],
+      "id": "cb6911d7-03ee-4fcf-94bd-34562a4e12d1",
+      "name": "Messages All",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// Дані приходять з Sort by Risk, не з Save Status\nconst data = $('Sort by Risk').first().json;\n\nif (!data || !data.students) {\n  return [{ json: { error: 'No data', input } }];\n}\n\nreturn [{\n  json: {\n    total:        data.total,\n    high_risk:    data.high_risk,\n    medium_risk:  data.medium_risk,\n    low_risk:     data.low_risk,\n    generated_at: data.generated_at,\n    students: data.students.map(s => ({\n      student_id:      s.student_id,\n      name:            s.student?.name,\n      risk_score:      s.risk_score,\n      risk_level:      s.risk_level,\n      student_state:   s.student_state,\n      primary_drivers: s.primary_drivers?.slice(0, 2) || [],\n      has_hw_journal:  true,\n    }))\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        -128
+      ],
+      "id": "57adc825-a145-4831-9fd0-20426b4ef342",
+      "name": "List"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nif (!data.students || !Array.isArray(data.students)) {\n  throw new Error('Invalid data: students array missing');\n}\n\n// Якщо студентів 0 — не кидаємо помилку, просто логуємо\nif (data.students.length === 0) {\n  console.log('Warning: no students processed');\n  // Не зберігаємо в кеш — повертаємо спеціальний статус\n  return [{\n    json: {\n      ...data,\n      cache_skip: true,\n      reason: 'no students processed'\n    }\n  }];\n}\n\nreturn [{ json: data }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        -128
+      ],
+      "id": "8cf7778c-403c-459d-a8e8-1f84109b6159",
+      "name": "Validate Before Cache"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: \"processing\", message: \"Аналіз запущено для всіх студентів\" }) }}",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        -128
+      ],
+      "id": "d3425c88-b319-4746-826a-e055dba63b87",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Batch Dashboard Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Active Students": {
+      "main": [
+        [
+          {
+            "node": "Timing Shift All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Timing Shift All": {
+      "main": [
+        [
+          {
+            "node": "Messages All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Batch Payload": {
+      "main": [
+        [
+          {
+            "node": "Call Planner per Student",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Planner per Student": {
+      "main": [
+        [
+          {
+            "node": "Sort by Risk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort by Risk": {
+      "main": [
+        [
+          {
+            "node": "Validate Before Cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Messages All": {
+      "main": [
+        [
+          {
+            "node": "Build Batch Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List": {
+      "main": [
+        [
+          {
+            "node": "Return Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Before Cache": {
+      "main": [
+        [
+          {
+            "node": "List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get All Active Students",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "962886f8-8c5f-4538-b0d4-52d28625ef9b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c1cbe352d6279a6c98647eae19a16f9af9e35a2445fae130f4aeb004fffe1fba"
+  },
+  "id": "OCWcCJ36nAhM87j5",
+  "tags": []
+}

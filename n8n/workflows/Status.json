@@ -1,0 +1,97 @@
+{
+  "name": "Status",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/planner/status",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "92b8094b-0a85-42e7-ae16-f177cb8db0f9",
+      "name": "Status Trigger",
+      "webhookId": "543473b2-8a88-439d-ae0b-35d36c9b7a2d"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT data \nFROM dashboard_cache \nWHERE cache_key = 'batch_status'\nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        0
+      ],
+      "id": "1993fb0a-b2e9-4845-8912-b3900a1aff6b",
+      "name": "Get Status",
+      "credentials": {
+        "postgres": {
+          "id": "PgAcctFixed00001",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.data || { status: \"no_data\" }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        416,
+        0
+      ],
+      "id": "8af50452-cddf-4f16-a511-903c561e7954",
+      "name": "Return Status"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Status Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Status": {
+      "main": [
+        [
+          {
+            "node": "Return Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9dfe7567-9864-47f9-8d3f-5f56fbc2d142",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "45f2a08fe6722181d73f4feb2cba04ef8dd2c1c068d919bc0c8e6b4c6eb2d67e"
+  },
+  "id": "DrrtwBvS5NnDWgeh",
+  "tags": []
+}

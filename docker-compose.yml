@@ -43,6 +43,66 @@ services:
       - pgadmin-data:/var/lib/pgadmin
       - ./infra/pgadmin/servers.json:/pgadmin4/servers.json:ro
 
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: app-n8n
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # --- Addressing ---
+      # N8N_PUBLIC_URL = externally reachable base. On VPS this is the Caddy
+      # subdomain (https://n8n.<domain>); locally it falls back to localhost.
+      # Inter-workflow HTTP nodes call http://localhost:5678/webhook/* — that
+      # resolves to n8n itself inside the container, so it works regardless of
+      # the public URL.
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PORT: 5678
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      N8N_EDITOR_BASE_URL: ${N8N_PUBLIC_URL:-http://localhost:5678}
+      WEBHOOK_URL: ${N8N_PUBLIC_URL:-http://localhost:5678}
+      # Caddy terminates TLS and is the single proxy hop in front of n8n.
+      N8N_PROXY_HOPS: 1
+      # --- Secrets / persistence ---
+      # Must stay constant across restarts or saved credentials become
+      # undecryptable. Set a real value in .env on the VPS.
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-dev-only-CHANGE-ME-32char-n8n-encryption-key}
+      DB_TYPE: sqlite
+      GENERIC_TIMEZONE: ${TZ:-Europe/Kyiv}
+      TZ: ${TZ:-Europe/Kyiv}
+      N8N_RUNNERS_ENABLED: "true"
+      # Allow `={{ $env.X }}` inside credential/node expressions. n8n
+      # (>= ~1.10x / 2.x, incl. n8nio/n8n:latest v2.20.9) flipped the DEFAULT
+      # of this to "true" (blocked) — leaving it unset now breaks every
+      # credential that reads $env with: "access to env vars denied
+      # [Error resolving credentials]". Our Postgres + Anthropic creds are
+      # `={{ $env.* }}` by design, so this MUST be explicitly false.
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      # --- Passed through for workflow credentials ---
+      # The two n8n credentials are created once with expression values:
+      #   Anthropic account → API Key = {{ $env.ANTHROPIC_API_KEY }}
+      #   Postgres account  → Host=postgres Port=5432 DB=$POSTGRES_DB
+      #                        User=$POSTGRES_USER Pass={{ $env.POSTGRES_PASSWORD }}
+      # so no secret is ever stored in the workflow JSON.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-appdb}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    ports:
+      # On VPS set BIND_HOST=127.0.0.1 in .env → only Caddy reaches n8n.
+      # Locally leave BIND_HOST unset → 0.0.0.0 → editor on localhost:5678.
+      - "${BIND_HOST:-0.0.0.0}:${N8N_PORT:-5678}:5678"
+    volumes:
+      - n8n-data:/home/node/.n8n
+      # Read-only inputs for `infra/n8n/bootstrap.sh` (CLI import). No secrets
+      # here — credentials.template.json holds {{ $env.X }} expressions only.
+      - ./infra/n8n/credentials.template.json:/import/credentials.json:ro
+      - ./n8n/workflows:/import/workflows:ro
+
 volumes:
   pgdata:
   pgadmin-data:
+  n8n-data:

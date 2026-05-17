@@ -1,0 +1,204 @@
+{
+  "name": "Strategy Sub-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/strategy/run",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a9c141e5-d7a0-47d2-9980-bf0dc1340c92",
+      "name": "Strategy Trigger",
+      "webhookId": "b1e3c95d-830f-4e17-938c-22ffb5647e8e"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=={{ $json.prompt_text }}",
+        "options": {
+          "systemMessage": "Ти Strategy Agent онлайн-школи.\n\nДія вже обрана математично — НЕ змінюй її.\nТвоя задача — написати коротке обґрунтування\nдля ментора чому саме ця дія потрібна зараз.\n\nСтиль: конкретно, без жаргону, 1-2 речення.\nАудиторія: ментор який бачить цей текст в дашборді.\n\nКРИТИЧНО: Відповідай ТІЛЬКИ валідним JSON без markdown.."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        656,
+        0
+      ],
+      "id": "cae7a5a1-b988-4743-93cd-6636987e69a4",
+      "name": "Strategy — Choose Action"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {
+          "maxTokensToSample": 400,
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        224
+      ],
+      "id": "475f4fbb-985f-499e-ac93-3b34b487996c",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "AnthropicAcct001",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// Очищення зайвих лапок\nfunction c(val) {\n  if (val === null || val === undefined) return val;\n  if (typeof val !== 'string') return val;\n  return val.replace(/^\"(.*)\"$/s, '$1');\n}\n\nconst rawText = input.output || input.text || input.response || '';\n\nconst clean = rawText\n  .replace(/```json/gi, '')\n  .replace(/```/g, '')\n  .trim();\n\nlet parsed;\ntry {\n  parsed = JSON.parse(clean);\n} catch (e) {\n  parsed = { rationale: 'Потребує негайної уваги ментора.' };\n}\n\nconst prev = $('Prepare Strategy Input').first().json;\n\nreturn [{\n  json: {\n    ...prev,\n\n    // Математично обрані — очищаємо лапки\n    recommended_action:        c(prev.recommended_action)        || 'no_action',\n    secondary_action:          c(prev.secondary_action)          || null,\n    priority:                  c(prev.priority)                  || 'low',\n    timing:                    c(prev.timing)                    || 'monitor',\n    expected_lift_qualitative: c(prev.expected_lift_qualitative) || 'low',\n\n    // Claude пояснює\n    rationale: c(parsed.rationale) || 'Потребує уваги.',\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        0
+      ],
+      "id": "4cd55f70-6fa8-4ccf-b5e5-43920fc3065e",
+      "name": "Strategy Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1232,
+        0
+      ],
+      "id": "793a3b47-933b-4657-b214-98395e155bbd",
+      "name": "Return Strategy Result"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst data  = input.body || input;\n\n// Очищення зайвих лапок\nfunction c(val) {\n  if (typeof val !== 'string') return val;\n  return val.replace(/^\"(.*)\"$/s, '$1');\n}\n\nconst computed         = data.computed_signals || {};\nconst observer         = data.observer_result  || {};\nconst hwSum            = data.hw_summary       || {};\nconst riskLevelCalc    = c(data.risk_level_calculated || data.risk_level || 'low');\nconst activeStageNames = data.active_stage_names || [];\nconst dropIntent       = observer.has_explicit_dropout_intent || false;\nconst redZone          = data.red_zone    || false;\nconst missedHw         = computed.missed_homework_count || 0;\nconst avgGrade         = parseFloat(c(String(hwSum.avg_grade || '100')));\nconst state            = c(data.student_state || 'on_track');\nconst timingShift      = computed.submission_timing_shift || false;\nconst urgency          = c(data.urgency_calculated || data.urgency || 'monitor');\n\nconsole.log('Calculate Strategy:');\nconsole.log('  riskLevelCalc:', riskLevelCalc);\nconsole.log('  activeStageNames:', activeStageNames);\nconsole.log('  dropIntent:', dropIntent);\nconsole.log('  timingShift:', timingShift);\nconsole.log('  missedHw:', missedHw);\nconsole.log('  urgency:', urgency);\n\n// ── ЛОГІКА ВИБОРУ ДІЇ ────────────────────────────────────────\nlet recommendedAction = 'no_action';\nlet secondaryAction   = null;\nlet priority          = 'low';\nlet timing            = 'monitor';\n\n// ЧЕРВОНА ЗОНА або етап 7\nif (redZone || activeStageNames.includes('no_mentor_response')) {\n  recommendedAction = 'mentor_call';\n  secondaryAction   = 'escalation_to_manager';\n  priority          = 'critical';\n  timing            = 'today';\n}\n// Етап 6 або явний намір залишити\nelse if (activeStageNames.includes('negative_messages') || dropIntent) {\n  recommendedAction = 'mentor_call';\n  // ВИПРАВЛЕННЯ: додаємо escalation якщо dropout_intent = true\n  secondaryAction   = dropIntent ? 'escalation_to_manager' : null;\n  priority          = 'high';\n  timing            = 'today';\n}\n// Етап 5 — login_gap\nelse if (activeStageNames.includes('login_gap')) {\n  recommendedAction = 'mentor_call';\n  secondaryAction   = null;\n  priority          = 'high';\n  timing            = 'today';\n}\n// Етап 4 — missed_homework\nelse if (missedHw >= 2 || activeStageNames.includes('missed_homework')) {\n  recommendedAction = 'mentor_call';\n  secondaryAction   = null;\n  priority          = 'medium';\n  timing            = 'this_week';\n}\n// Низькі оцінки — матеріал\nelse if (avgGrade < 65 && missedHw === 0) {\n  recommendedAction = 'additional_material';\n  secondaryAction   = null;\n  priority          = 'medium';\n  timing            = 'this_week';\n}\n// Етап 1-3 або submission_timing_shift\nelse if (\n  activeStageNames.includes('late_homework')        ||\n  activeStageNames.includes('stopped_questions')    ||\n  activeStageNames.includes('missed_live_sessions') ||\n  timingShift === true\n) {\n  recommendedAction = 'personal_message';\n  secondaryAction   = null;\n  priority          = 'medium';\n  timing            = 'this_week';\n}\n// Silent but OK або low без сигналів\nelse if (state === 'silent_but_ok' || riskLevelCalc === 'low') {\n  recommendedAction = 'no_action';\n  secondaryAction   = null;\n  priority          = 'low';\n  timing            = 'monitor';\n}\n\n// ── EXPECTED LIFT ─────────────────────────────────────────────\nconst liftMap = {\n  mentor_call:           'high',\n  personal_message:      'medium',\n  additional_material:   'medium',\n  freeze_course:         'medium',\n  next_cohort:           'low',\n  escalation_to_manager: 'high',\n  no_action:             'low',\n};\n\nreturn [{\n  json: {\n    ...data,\n    recommended_action:        recommendedAction,\n    secondary_action:          secondaryAction,\n    priority,\n    timing,\n    expected_lift_qualitative: liftMap[recommendedAction] || 'low',\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "59d3d17a-f4e9-40ef-9d44-516389dea81b",
+      "name": "Calculate Strategy"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst data     = input.body || input;\nconst student  = data.student          || {};\nconst observer = data.observer_result  || {};\nconst computed = data.computed_signals || {};\n\nconst promptText =\n  'Поясни чому обрана ця стратегія для студента.\\n\\n' +\n\n  'СТУДЕНТ: ' + (student.name || '?') + '\\n\\n' +\n\n  'МАТЕМАТИЧНО ОБРАНА СТРАТЕГІЯ:\\n' +\n  '- recommended_action: ' + data.recommended_action + '\\n' +\n  '- secondary_action: ' + (data.secondary_action || 'немає') + '\\n' +\n  '- priority: ' + data.priority + '\\n' +\n  '- timing: ' + data.timing + '\\n\\n' +\n\n  'КОНТЕКСТ РИЗИКУ:\\n' +\n  '- risk_score: ' + (data.risk_score_calculated || 0) + '\\n' +\n  '- risk_level: ' + (data.risk_level_calculated || 'low') + '\\n' +\n  '- student_state: ' + (data.student_state || 'unknown') + '\\n' +\n  '- urgency: ' + (data.urgency_calculated || 'monitor') + '\\n' +\n  '- days_to_dropout: ' + (data.days_to_dropout || 'невідомо') + '\\n' +\n  '- red_zone: ' + (data.red_zone || false) + '\\n' +\n  '- has_explicit_dropout_intent: ' + (observer.has_explicit_dropout_intent || false) + '\\n' +\n  '- missed_homework: ' + (computed.missed_homework_count || 0) + '\\n\\n' +\n\n  'PRIMARY DRIVERS:\\n' +\n  (data.primary_drivers || []).map(d => '- ' + d).join('\\n') + '\\n\\n' +\n\n  'Поверни ТІЛЬКИ валідний JSON:\\n' +\n  '{\\n' +\n  '  \"rationale\": \"<1-2 речення чому саме ця дія потрібна зараз — для ментора>\"\\n' +\n  '}';\n\nreturn [{\n  json: {\n    ...data,\n    prompt_text: promptText,\n  }\n}];;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        0
+      ],
+      "id": "75dd971e-f2c5-4b5d-9d8c-8f01fe0d251a",
+      "name": "Prepare Strategy Input"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Strategy Trigger": {
+      "main": [
+        [
+          {
+            "node": "Calculate Strategy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Strategy — Choose Action",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Strategy — Choose Action": {
+      "main": [
+        [
+          {
+            "node": "Strategy Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Strategy Response": {
+      "main": [
+        [
+          {
+            "node": "Return Strategy Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Strategy": {
+      "main": [
+        [
+          {
+            "node": "Prepare Strategy Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Strategy Input": {
+      "main": [
+        [
+          {
+            "node": "Strategy — Choose Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b9b9570c-7b59-430c-b692-694a0c9cd034",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "45f2a08fe6722181d73f4feb2cba04ef8dd2c1c068d919bc0c8e6b4c6eb2d67e"
+  },
+  "id": "Hbiqn7VxkNML7XFr",
+  "tags": []
+}

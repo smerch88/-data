@@ -1,0 +1,204 @@
+{
+  "name": "Communicator Sub-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/communicator/run",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "91b96341-da79-44bc-a0a7-4208749c0e45",
+      "name": "Communicator Trigger",
+      "webhookId": "967c85ff-2ead-414f-8763-4b9f97824e42"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=={{ $json.prompt_text }}",
+        "options": {
+          "systemMessage": "Ти Communicator Agent онлайн-школи. Пишеш повідомлення від імені ментора.\n\nСТИЛЬ: тепло, людяно, без тиску і статистики.\nЗАБОРОНЕНО у draft_message:\n- цифри: \"8 днів\", \"3 пропущені ДЗ\"\n- слова: \"помітили\", \"відсутність\", \"активність знизилась\"\n- тиск або звинувачення будь-якого роду\n- фрази типу \"ми бачимо що ти не...\"\n\nДОЗВОЛЕНО:\n- \"здається, останній модуль міг бути складним\"\n- \"бувають тижні коли все навалюється\"\n- конкретна пропозиція: \"давай зідзвонимось на 15 хв\"\n- підтримка без причинно-наслідкового зв'язку з цифрами\n\nДОВЖИНА draft_message: 2-3 речення.\nВідповідай ТІЛЬКИ валідним JSON.pful assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        432,
+        0
+      ],
+      "id": "853431c5-e76d-4d45-b368-4bd74b79b72c",
+      "name": "Communicator — Generate Draft"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {
+          "maxTokensToSample": 600,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        224
+      ],
+      "id": "a3da7cfb-c408-40e4-8088-4d9efd9934a4",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "AnthropicAcct001",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// Очищення зайвих лапок\nfunction c(val) {\n  if (val === null || val === undefined) return val;\n  if (typeof val !== 'string') return val;\n  return val.replace(/^\"(.*)\"$/s, '$1');\n}\n\nconst rawText = input.output || input.text || input.response || '';\n\nconst clean = rawText\n  .replace(/```json/gi, '')\n  .replace(/```/g, '')\n  .trim();\n\nlet parsed;\ntry {\n  parsed = JSON.parse(clean);\n} catch (e) {\n  parsed = {\n    draft_message:   '',\n    mentor_summary:  '',\n    dashboard_label: '⚠️ Потребує уваги',\n  };\n}\n\nconst prev = $('Communicator Trigger').first().json;\nconst data = prev.body || prev;\n\nreturn [{\n  json: {\n    ...data,\n\n    // Очищаємо лапки\n    draft_message:   c(parsed.draft_message)   || '',\n    mentor_summary:  c(parsed.mentor_summary)  || '',\n    dashboard_label: c(parsed.dashboard_label) || '⚠️ Потребує уваги',\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        0
+      ],
+      "id": "47167a56-63ce-44ff-a4f4-8b0757898f78",
+      "name": "Parse Communicator Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1232,
+        0
+      ],
+      "id": "ac186229-37b2-42c7-aa30-8b0871c47fe1",
+      "name": "Return Communicator Result"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// Математично визначаємо label по priority і action\nconst labelMap = {\n  critical: {\n    mentor_call:           '🚨 КРИТИЧНО — дзвінок сьогодні',\n    escalation_to_manager: '🚨 КРИТИЧНО — ескалація менеджеру',\n  },\n  high: {\n    mentor_call:           '⚠️ Потребує дзвінка від ментора',\n    personal_message:      '⚠️ Надіслати повідомлення сьогодні',\n  },\n  medium: {\n    personal_message:      '💬 М\\'який дотик цього тижня',\n    additional_material:   '📚 Надати додатковий матеріал',\n    mentor_call:           '📞 Запланувати дзвінок',\n  },\n  low: {\n    no_action:             '✅ Все гаразд — моніторинг',\n  },\n};\n\nconst priority = input.priority || 'low';\nconst action   = input.recommended_action || 'no_action';\n\nconst label = labelMap[priority]?.[action]\n  || labelMap['low']['no_action'];\n\nreturn [{\n  json: {\n    ...input,\n    dashboard_label: label,\n  }\n}];;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        0
+      ],
+      "id": "ced648ad-2098-4618-9d21-5110e97f73c0",
+      "name": "Set Dashboard Label"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst data  = input.body || input;\n\nconst student  = data.student          || {};\nconst observer = data.observer_result  || {};\nconst computed = data.computed_signals || {};\n\nconst promptText =\n  'Згенеруй комунікацію для студента.\\n\\n' +\n\n  'СТУДЕНТ: ' + (student.name || '?') + '\\n' +\n  'КУРС: ' + (student.course || '?') + '\\n\\n' +\n\n  'СИТУАЦІЯ:\\n' +\n  '- student_state: ' + (data.student_state || '?') + '\\n' +\n  '- recommended_action: ' + (data.recommended_action || '?') + '\\n' +\n  '- priority: ' + (data.priority || '?') + '\\n' +\n  '- timing: ' + (data.timing || '?') + '\\n' +\n  '- days_to_dropout: ' + (data.days_to_dropout_estimate || '?') + '\\n\\n' +\n\n  'ПРИЧИНИ РИЗИКУ:\\n' +\n  (data.primary_drivers || []).map(d => '- ' + d).join('\\n') + '\\n\\n' +\n\n  'ОБҐРУНТУВАННЯ СТРАТЕГІЇ:\\n' +\n  (data.rationale || '') + '\\n\\n' +\n\n  'ОСТАННІ ПОВІДОМЛЕННЯ СТУДЕНТА:\\n' +\n  (data.recent_messages || []).join('\\n') + '\\n\\n' +\n\n  'Поверни ТІЛЬКИ валідний JSON без markdown:\\n' +\n  '{\\n' +\n  '  \"draft_message\": \"<2-3 речення без цифр і тиску>\",\\n' +\n  '  \"mentor_summary\": \"<1-2 речення для ментора>\",\\n' +\n  '  \"dashboard_label\": \"<коротка фраза для картки>\"\\n' +\n  '}';\n\nreturn [{\n  json: {\n    ...data,\n    prompt_text: promptText,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5302cbde-8bfa-43cb-a1c1-0b6fd09c5442",
+      "name": "Prepare Communicator Input"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Communicator Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Communicator Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Communicator — Generate Draft",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Communicator — Generate Draft": {
+      "main": [
+        [
+          {
+            "node": "Parse Communicator Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Communicator Response": {
+      "main": [
+        [
+          {
+            "node": "Set Dashboard Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Dashboard Label": {
+      "main": [
+        [
+          {
+            "node": "Return Communicator Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Communicator Input": {
+      "main": [
+        [
+          {
+            "node": "Communicator — Generate Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f73325d3-a15e-4d91-99cf-c15b77e78b29",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "45f2a08fe6722181d73f4feb2cba04ef8dd2c1c068d919bc0c8e6b4c6eb2d67e"
+  },
+  "id": "hKelJHpEq1XPm6On",
+  "tags": []
+}

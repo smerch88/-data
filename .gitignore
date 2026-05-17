@@ -8,6 +8,7 @@ dist/
 .vscode/
 coverage/
 infra/vps/logs/
+backups/
 
 # Raw OULAD dataset — re-downloaded on demand via `npm run data:download`
 # (figshare DOI 10.6084/m9.figshare.5081998, CC BY 4.0). 500 MB+, not for git.
