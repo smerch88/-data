@@ -36,3 +36,6 @@ tmp_*
 *.orig
 *.rej
 scratch/
+
+# One-off demo automation/recalc scripts (hardcoded names, not for public)
+_recal*
