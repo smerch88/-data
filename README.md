@@ -1,6 +1,55 @@
-# -data
+# Student Success Agent — AI Multi-Agent Student Retention Platform
 
-Postgres у Docker + малий Node.js/TypeScript бекенд для API доступу + pgAdmin для редагування з браузера. Розробка ведеться через Claude Code (субагенти + слеш-команди).
+> Зупиняємо відтік студентів до того, як вони морально пішли.
+
+Онлайн-школи втрачають 30–50% студентів, не помічаючи 5–6 ранніх сигналів дропауту. Кожен втрачений студент — $1 848+ прямих збитків (CAC + недоотриманий LTV). **Student Success Agent** — мульти-агентна AI-система, що в реальному часі моніторить активність у LMS і Slack, виявляє студентів у групі ризику, пояснює причину і генерує персональну чернетку повідомлення для повернення.
+
+## Продукт
+
+**Для кого:** course manager / mentor онлайн-школи (GoIT, Hillel, Projector тощо), 100–5 000 активних студентів.
+
+**Що робить:**
+- Агент-Спостерігач — збирає сигнали: логіни, здача ДЗ, активність у чаті, оцінки
+- Агент-Аналітик — оцінює ризик дропауту по кожному студенту, виявляє тренди
+- Агент-Стратег — визначає пріоритет дій та стратегію втримання
+- Агент-Комунікатор — генерує персональну чернетку повідомлення у tone-of-voice школи
+
+**Ключові метрики:** 7–15% retention uplift з AI; <10% MOOC completion rate без інтервенції.
+
+## Стек
+
+| Шар | Технологія |
+|---|---|
+| AI-оркестрація | n8n + Claude API (Anthropic) |
+| База даних | PostgreSQL 16 (Docker) |
+| Backend API | Node.js / TypeScript / Express / Knex |
+| DB-адмін | pgAdmin 4 |
+| Дані для демо | OULAD dataset (Open University, CC BY 4.0) |
+| Dev-середовище | Claude Code (субагенти + слеш-команди) |
+
+## Швидкий старт
+
+```bash
+git clone https://github.com/smerch88/-data.git
+cd -data
+cp .env.example .env
+docker compose up -d
+cd backend && npm install
+npm run migrate:up
+npm run data:full        # завантаження OULAD → семпл → seed у БД
+```
+
+Після запуску:
+- **API:** http://localhost:3000/health
+- **pgAdmin:** http://localhost:5050 (логін з `.env`)
+
+Детальний troubleshooting — нижче в розділі "Якщо щось пішло не так".
+
+---
+
+*Цей репозиторій — data-layer (Postgres + backend API). Продуктова концепція, архітектура агентів та емпіричний фундамент — у [docs/PROJECT_VISION.md](docs/PROJECT_VISION.md).*
+
+---
 
 ## Що всередині
 
