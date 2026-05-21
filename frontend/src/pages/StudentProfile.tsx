@@ -2,7 +2,6 @@ import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeftCircle,
   Siren,
-  Mail,
   MessageSquare,
   Search,
   Quote,
@@ -16,8 +15,8 @@ import { Avatar } from '@/components/Avatar';
 import { RiskGauge } from '@/components/RiskGauge';
 import { TrendDelta } from '@/components/TrendDelta';
 import { LoginBars } from '@/components/LoginBars';
+import { DraftMessageCard } from '@/components/DraftMessageCard';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge, riskTone } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAsync } from '@/lib/useAsync';
@@ -206,35 +205,10 @@ export default function StudentProfile() {
                 </div>
               </Card>
 
-              <Card>
-                <div className="p-8 flex flex-col gap-5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Mail className="size-5" />
-                      <h3 className="text-lg font-bold">Чернетка повідомлення</h3>
-                    </div>
-                    <span className="text-sm font-bold text-brand">Згенеровано AI</span>
-                  </div>
-                  <div className="rounded-card bg-neutral-50 p-6 text-[15px] leading-6 text-neutral-700 whitespace-pre-wrap min-h-[160px]">
-                    {data.analysis?.draftMessage ?? 'Повідомлення з’явиться після аналізу.'}
-                  </div>
-                  <Button
-                    className="w-full h-12 text-base"
-                    disabled={!data.analysis?.draftMessage}
-                    onClick={() =>
-                      data.analysis?.draftMessage &&
-                      navigator.clipboard?.writeText(data.analysis.draftMessage)
-                    }
-                    title="Скопіювати текст (інтеграція зі Slack — окремий крок)"
-                  >
-                    Відправити в Slack
-                  </Button>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button variant="subtle">Редагувати</Button>
-                    <Button variant="subtle">Пропустити</Button>
-                  </div>
-                </div>
-              </Card>
+              <DraftMessageCard
+                key={`${data.student.id}:${selectedRunId ?? 'live'}`}
+                draftMessage={data.analysis?.draftMessage ?? null}
+              />
             </div>
 
             {/* AI insights + Slack quotes + Communication */}
