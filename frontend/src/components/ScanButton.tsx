@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw, Loader2, AlertTriangle, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from './ui/button';
 import { api, type ScanState } from '@/lib/api';
 
@@ -27,8 +28,10 @@ export function ScanButton({
 }) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [state, setState] = useState<ScanState | null>(null);
-  const [msg, setMsg] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  // The /scan/state poll fires every 5s — guard so a "stalled" run raises
+  // exactly one toast, not one per tick.
+  const stalledToasted = useRef(false);
   // Server is the source of truth for "a scan is running" — phase is local
   // and resets on remount, so we track it via a ref (also avoids a stale
   // `phase` closure inside the poll interval).
@@ -48,6 +51,13 @@ export function ScanButton({
     if (s.stalled) {
       runningRef.current = true;
       setPhase('stalled');
+      if (!stalledToasted.current) {
+        stalledToasted.current = true;
+        toast.warning('Аналіз застряг', {
+          description:
+            'n8n не пише результати. Перевір, що воркфлоу активні, або видали цей запуск на таймлайні. Сам впаде за ~5 хв.',
+        });
+      }
     } else if (s.inProgress) {
       runningRef.current = true;
       setPhase('running');
@@ -56,9 +66,13 @@ export function ScanButton({
       stop();
       if (s.runStatus === 'failed') {
         setPhase('error');
-        setMsg('Аналіз не завершився — n8n не відповів. Спробуй ще раз або перевір воркфлоу/видали запуск на таймлайні.');
+        toast.error('Аналіз не завершився', {
+          description:
+            'n8n не відповів або впав. Перевір активність воркфлоу n8n та лог виконання, або видали цей запуск на таймлайні.',
+        });
       } else {
         setPhase('done');
+        toast.success('Аналіз завершено');
         onDone?.();
       }
     } else {
@@ -102,7 +116,7 @@ export function ScanButton({
 
   async function start() {
     setPhase('starting');
-    setMsg(null);
+    stalledToasted.current = false;
     try {
       const r = await api.triggerScan(asOfDate);
       if (!r.triggered) {
@@ -114,7 +128,9 @@ export function ScanButton({
           return;
         }
         setPhase('error');
-        setMsg(r.error || 'n8n не прийняв запит');
+        toast.error('Не вдалося запустити аналіз', {
+          description: r.error || 'n8n не прийняв запит',
+        });
         return;
       }
       runningRef.current = true;
@@ -123,7 +139,9 @@ export function ScanButton({
       setTimeout(poll, 4000);
     } catch (e) {
       setPhase('error');
-      setMsg(e instanceof Error ? e.message : 'Помилка запуску');
+      toast.error('Помилка запуску аналізу', {
+        description: e instanceof Error ? e.message : 'Невідома помилка',
+      });
     }
   }
 
@@ -162,16 +180,6 @@ export function ScanButton({
         {(phase === 'idle' || phase === 'done' || phase === 'error') &&
           (noAnalysisForDate ? 'Зробити аналіз' : 'Оновити аналіз')}
       </Button>
-      {phase === 'stalled' && (
-        <span className="text-xs text-amber-600 text-right max-w-[260px]">
-          n8n не пише результати. Перевір, що воркфлоу активні, або видали цей
-          запуск на таймлайні. Сам впаде за ~5 хв.
-        </span>
-      )}
-      {phase === 'done' && <span className="text-xs text-ok-dark">Аналіз завершено ✓</span>}
-      {phase === 'error' && (
-        <span className="text-xs text-risk-high text-right max-w-[260px]">{msg}</span>
-      )}
     </div>
   );
 }

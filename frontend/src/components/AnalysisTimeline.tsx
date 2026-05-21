@@ -89,8 +89,8 @@ export function AnalysisTimeline({
           <div>
             <h3 className="text-sm font-bold text-neutral-600">Таймлайн аналізів</h3>
             <p className="text-xs text-neutral-500 mt-0.5">
-              Кожен запуск — точка на осі курсу. Натисни завершену точку, щоб
-              повернутися до того аналізу.
+              Кожен запуск — точка на осі курсу. Натисни завершену — щоб
+              переглянути аналіз, невдалу — щоб повторити запуск.
             </p>
           </div>
           <button
@@ -151,7 +151,9 @@ export function AnalysisTimeline({
           {runs.map((r) => {
             const left = ratioInRange(r.asOfDate, start, end) * 100;
             const selected = r.id === selectedRunId;
-            const clickable = r.status === 'complete';
+            // Complete → revisit the frozen analysis; failed → pick it so the
+            // scan button can retry that as-of date. Running is not selectable.
+            const selectable = r.status === 'complete' || r.status === 'failed';
             const dy = dyById.get(r.id) ?? 0;
             return (
               <div
@@ -170,13 +172,15 @@ export function AnalysisTimeline({
                 )}
                 <button
                   type="button"
-                  disabled={!clickable}
-                  onClick={() => clickable && onSelect(r.id)}
+                  disabled={!selectable}
+                  onClick={() => selectable && onSelect(r.id)}
                   title={
                     `${fmtDate(r.asOfDate)} · ${r.status}` +
                     (r.status === 'complete'
                       ? ` · ${r.high} high / ${r.medium} med / ${r.low} low`
-                      : '') +
+                      : r.status === 'failed'
+                        ? ' · клік — повторити аналіз'
+                        : '') +
                     `\nзапущено ${fmtDateTime(r.triggeredAt)}`
                   }
                   className="block"
@@ -184,12 +188,22 @@ export function AnalysisTimeline({
                   <span
                     className={`block rounded-full border-2 transition-all ${
                       STATUS_COLOR[r.status] ?? 'bg-neutral-300 border-neutral-400'
-                    } ${selected ? 'size-5 ring-4 ring-brand/25' : 'size-3.5'} ${
-                      r.status === 'running' ? 'animate-pulse' : ''
-                    } ${clickable ? 'cursor-pointer hover:scale-125' : 'cursor-default'}`}
+                    } ${
+                      selected
+                        ? `size-5 ring-4 ${
+                            r.status === 'failed' ? 'ring-rose-400/40' : 'ring-brand/25'
+                          }`
+                        : 'size-3.5'
+                    } ${r.status === 'running' ? 'animate-pulse' : ''} ${
+                      selectable ? 'cursor-pointer hover:scale-125' : 'cursor-default'
+                    }`}
                   />
                   {selected && (
-                    <span className="absolute left-1/2 -translate-x-1/2 -top-9 whitespace-nowrap rounded-full bg-brand px-2.5 py-1 text-[11px] font-bold text-white">
+                    <span
+                      className={`absolute left-1/2 -translate-x-1/2 -top-9 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold text-white ${
+                        r.status === 'failed' ? 'bg-rose-500' : 'bg-brand'
+                      }`}
+                    >
                       {fmtDate(r.asOfDate)}
                     </span>
                   )}
@@ -216,7 +230,7 @@ export function AnalysisTimeline({
         <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-neutral-500">
           <Legend className="bg-brand">завершений (клік — переглянути)</Legend>
           <Legend className="bg-amber-400">виконується</Legend>
-          <Legend className="bg-neutral-300">невдалий</Legend>
+          <Legend className="bg-neutral-300">невдалий (клік — повторити)</Legend>
           <span className="flex items-center gap-1.5">
             <span className="w-px h-3 bg-neutral-400" /> дедлайн ДЗ
           </span>

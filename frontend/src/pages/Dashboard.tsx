@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, ArrowRightCircle, FileText, ArrowUpDown, History, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { Upload, ArrowRightCircle, FileText, ArrowUpDown, History, X, AlertTriangle } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { StatCard } from '@/components/StatCard';
 import { ScanButton } from '@/components/ScanButton';
@@ -32,6 +33,12 @@ export default function Dashboard() {
   // and must not be shown on the timeline (same point-in-time logic as data).
   const visibleRuns = runs.filter((r) => r.asOfDate <= asOf);
   const hiddenFuture = runs.length - visibleRuns.length;
+
+  // A failed run picked on the timeline. The demo date deliberately stays put
+  // (user decision 2026-05-21) — selecting it only retargets the scan button
+  // to that run's as-of date so "Оновити аналіз" retries exactly that day.
+  const selectedFailedRun =
+    visibleRuns.find((r) => r.id === selectedRunId && r.status === 'failed') ?? null;
   // The table lists the FULL analyzed roster, ordered by the backend
   // (lost ASC, risk_score DESC NULLS LAST) — most-risky first, "lost" muted
   // at the bottom. The "В групі ризику" KPI stays a narrower count (active
@@ -51,13 +58,15 @@ export default function Dashboard() {
   // *selected date itself* — i.e. nothing at all, or just an older
   // auto-resolved run shown with the grey note. A run exactly at the demo date,
   // or an explicit historical pick, keeps "Оновити аналіз".
-  const noAnalysisForDate = !data
-    ? false // still loading — don't flip the label until we know
-    : !data.selectedRun
-      ? true
-      : data.selectedRun.auto
-        ? data.selectedRun.asOfDate !== asOf
-        : false;
+  const noAnalysisForDate = selectedFailedRun
+    ? false // retrying a failed run is a refresh — keep the "Оновити" label
+    : !data
+      ? false // still loading — don't flip the label until we know
+      : !data.selectedRun
+        ? true
+        : data.selectedRun.auto
+          ? data.selectedRun.asOfDate !== asOf
+          : false;
 
   // Delete a stored analysis run (any status). If the deleted run was the
   // one being viewed, drop back to live; then refresh timeline + overview.
@@ -67,13 +76,24 @@ export default function Dashboard() {
     }
     const res = await api.deleteRun(r.id);
     if (!res.deleted) {
-      window.alert(`Не вдалося видалити аналіз: ${res.error ?? 'невідома помилка'}`);
+      toast.error('Не вдалося видалити аналіз', {
+        description: res.error ?? 'невідома помилка',
+      });
       return;
     }
     if (selectedRunId === r.id) setSelectedRunId(null);
+    toast.success(`Аналіз від ${fmtDate(r.asOfDate)} видалено`);
     runsQ.reload();
     reload();
   }
+
+  // Surface a failed data load as a toast (the inline error card with its
+  // retry button stays — the toast just makes the failure impossible to miss).
+  useEffect(() => {
+    if (error) {
+      toast.error('Не вдалося завантажити дані', { description: error });
+    }
+  }, [error]);
 
   // Poll while any run is still processing so its point flips to "complete"
   // (the GET /runs read also triggers the lazy server-side finalize).
@@ -126,8 +146,11 @@ export default function Dashboard() {
               Експорт звіту
             </Button>
             <ScanButton
-              asOfDate={asOf}
-              onDone={reload}
+              asOfDate={selectedFailedRun ? selectedFailedRun.asOfDate : asOf}
+              onDone={() => {
+                reload();
+                runsQ.reload();
+              }}
               noAnalysisForDate={noAnalysisForDate}
             />
           </div>
@@ -169,6 +192,26 @@ export default function Dashboard() {
             <History className="size-3.5" />
             Показники — станом на <b>{fmtDate(asOf)}</b>; останній наявний AI-аналіз — від{' '}
             <b>{fmtDate(data.selectedRun.asOfDate)}</b>.
+          </div>
+        )}
+
+        {/* A failed run was picked on the timeline — offer to retry it.
+            The demo date is unchanged; only the scan button is retargeted. */}
+        {selectedFailedRun && (
+          <div className="flex flex-wrap items-center gap-3 rounded-card border border-rose-300 bg-rose-50 px-5 py-3 text-sm">
+            <AlertTriangle className="size-4 text-rose-600" />
+            <span className="text-rose-800">
+              Аналіз від <b>{fmtDate(selectedFailedRun.asOfDate)}</b> завершився
+              помилкою (запущено {fmtDateTime(selectedFailedRun.triggeredAt)}).
+              Натисни <b>«Оновити аналіз»</b>, щоб повторити запуск для цієї дати.
+            </span>
+            <button
+              onClick={() => setSelectedRunId(null)}
+              className="ml-auto flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100"
+            >
+              <X className="size-3.5" />
+              до поточного
+            </button>
           </div>
         )}
 

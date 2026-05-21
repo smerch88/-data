@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import './index.css';
 import { AsOfProvider } from './lib/asOfContext';
 import Dashboard from './pages/Dashboard';
@@ -16,6 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AsOfProvider>
       <RouterProvider router={router} />
+      <Toaster richColors closeButton position="top-right" />
     </AsOfProvider>
   </React.StrictMode>,
 );
