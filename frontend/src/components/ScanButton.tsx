@@ -116,6 +116,11 @@ export function ScanButton({
 
   async function start() {
     setPhase('starting');
+    // Drop the previous run's reading immediately. analysis_results still
+    // holds the prior run's 15 rows (POST /scan doesn't clear them), so a
+    // stale `state` would make the button flash "15/15" until the first
+    // poll resets it to the real 0/15. Null → neutral "Аналіз виконується…".
+    setState(null);
     stalledToasted.current = false;
     try {
       const r = await api.triggerScan(asOfDate);
